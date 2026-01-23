@@ -13,22 +13,7 @@ import { Plus, Bell, Settings, Shield, Check, User, Lock, Award, CheckCircle, In
 import { Button } from "@/components/ui/button"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
-
-function LoadingState() {
-  return (
-    <div className="min-h-screen bg-background">
-      <SidebarNav />
-      <MobileBottomNav />
-      <main className="lg:ml-64 pb-20 lg:pb-8">
-        <div className="container mx-auto px-4 lg:px-8 py-8">
-          <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Loading...</p>
-          </div>
-        </div>
-      </main>
-    </div>
-  )
-}
+import { PageSkeleton } from "@/components/loading/page-skeleton"
 
 export default function AchievementsPage() {
   const { data: session, status } = useSession()
@@ -98,7 +83,7 @@ export default function AchievementsPage() {
 
   // Initial loading state
   if (status === "loading" || profileLoading || entriesLoading || achievementsLoading || progressLoading) {
-    return <LoadingState />
+    return <PageSkeleton belt={profile?.belt} showStats={false} showChart={false} showList={false} />
   }
 
   if (!session?.user?.id) {

@@ -21,6 +21,7 @@ import { JournalEntry as DbJournalEntry } from "@/lib/db/schema"
 import { TrainingStyleSelector, TrainingStyle } from "@/components/start-training/training-style-selector"
 import { FocusAreaTags } from "@/components/start-training/focus-area-tags"
 import { IntensityLevelBar } from "@/components/start-training/intensity-level-bar"
+import { ButtonLoader } from "@/components/loading/button-loader"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -374,14 +375,17 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
           >
             Cancel
           </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isLoading}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20"
-          >
-            {isLoading ? "Saving..." : "Save Entry"}
-          </Button>
+          {isLoading ? (
+            <ButtonLoader text="Saving..." className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20" />
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSave}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20"
+            >
+              Save Entry
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

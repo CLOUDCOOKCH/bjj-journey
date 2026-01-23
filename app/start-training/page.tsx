@@ -19,6 +19,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { formatDateToYYYYMMDD } from "@/lib/utils/date"
 import { useJournalEntries } from "@/lib/hooks"
 import { StartTrainingSearchParams } from "@/components/start-training/start-training-search-params"
+import { PageSkeleton } from "@/components/loading/page-skeleton"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -258,7 +259,7 @@ function StartTrainingForm({ searchParams, userId, entries }: { searchParams: UR
 
 export default function StartTrainingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>}>
+    <Suspense fallback={<PageSkeleton />}>
       <StartTrainingSearchParams>
         {(searchParams) => {
           const { data: session, status } = useSession()
@@ -267,19 +268,7 @@ export default function StartTrainingPage() {
           const { data: entries = [] } = useJournalEntries(isAuthenticated)
 
           if (status === "loading") {
-            return (
-              <div className="min-h-screen bg-background">
-                <SidebarNav />
-                <MobileBottomNav />
-                <main className="lg:ml-64 pb-20 lg:pb-8">
-                  <div className="container mx-auto px-4 py-8">
-                    <div className="flex items-center justify-center h-64">
-                      <p className="text-muted-foreground">Loading...</p>
-                    </div>
-                  </div>
-                </main>
-              </div>
-            )
+            return <PageSkeleton />
           }
 
           if (!userId) {

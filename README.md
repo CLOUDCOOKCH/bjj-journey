@@ -128,6 +128,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. Sign up with your email and password
 3. Start tracking your Jiu Jitsu journey!
 
+### 7. Test Credentials
+
+For quick testing, you can use the following test account:
+
+- **Email**: `wick@gmail.com`
+- **Password**: `wicked!`
+
 ## Environment Variables Reference
 
 | Variable | Description | Example |

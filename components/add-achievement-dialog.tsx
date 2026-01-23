@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCreateAchievement, achievementKeys } from "@/lib/hooks"
 import { getTodayAsYYYYMMDD } from "@/lib/utils/date"
+import { ButtonLoader } from "@/components/loading/button-loader"
 
 interface AddAchievementDialogProps {
   isOpen: boolean
@@ -146,14 +147,17 @@ export function AddAchievementDialog({ isOpen, onClose, userId }: AddAchievement
           >
             Cancel
           </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
-          >
-            {isLoading ? "Adding..." : "Add Achievement"}
-          </Button>
+          {isLoading ? (
+            <ButtonLoader text="Adding..." className="bg-blue-600 hover:bg-blue-700 transition-all duration-200" />
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSave}
+              className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+            >
+              Add Achievement
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

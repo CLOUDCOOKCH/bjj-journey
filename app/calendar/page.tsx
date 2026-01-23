@@ -9,6 +9,7 @@ import { CalendarHeader } from "@/components/calendar-header"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { useJournalEntries, useProfile } from "@/lib/hooks"
+import { CalendarSkeleton } from "@/components/loading/page-skeleton"
 
 export default function CalendarPage() {
   const router = useRouter()
@@ -20,19 +21,7 @@ export default function CalendarPage() {
   const { data: profile, isLoading: profileLoading } = useProfile(isAuthenticated)
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-background">
-        <SidebarNav />
-        <MobileBottomNav />
-        <main className="lg:ml-64 pb-20 lg:pb-8">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
+    return <CalendarSkeleton />
   }
 
   if (!userId) {
@@ -40,19 +29,7 @@ export default function CalendarPage() {
   }
 
   if (entriesLoading || profileLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SidebarNav />
-        <MobileBottomNav />
-        <main className="lg:ml-64 pb-20 lg:pb-8">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
+    return <CalendarSkeleton belt={profile?.belt} />
   }
 
   const monthlyGoal = profile?.monthlyGoal || 12

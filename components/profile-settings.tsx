@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import { ButtonLoader } from "@/components/loading/button-loader"
 
 interface ProfileSettingsProps {
     initialName: string
@@ -65,13 +66,16 @@ export function ProfileSettings({ initialName, userId }: ProfileSettingsProps) {
 
                 {name !== initialName && (
                     <div className="pt-4 border-t border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                        <Button
-                            onClick={handleSave}
-                            disabled={isLoading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-200"
-                        >
-                            {isLoading ? "Saving..." : "Save Changes"}
-                        </Button>
+                        {isLoading ? (
+                            <ButtonLoader text="Saving..." className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-200" />
+                        ) : (
+                            <Button
+                                onClick={handleSave}
+                                className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+                            >
+                                Save Changes
+                            </Button>
+                        )}
                     </div>
                 )}
             </CardContent>

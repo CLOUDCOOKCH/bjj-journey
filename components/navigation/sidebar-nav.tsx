@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Calendar, BookOpen, Video, Award, Target, Shield, LogOut, Settings } from "lucide-react"
+import { LayoutDashboard, Calendar, BookOpen, Award, Shield, LogOut, Settings } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 
@@ -10,9 +10,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/journal", label: "Journal", icon: BookOpen },
-  { href: "/techniques", label: "Techniques", icon: Video },
   { href: "/achievements", label: "Achievements", icon: Award },
-  { href: "/goals", label: "Goals", icon: Target },
 ]
 
 interface SidebarNavProps {
@@ -59,38 +57,29 @@ export function SidebarNav({ belt, name }: SidebarNavProps) {
       </nav>
 
       {/* User Menu */}
-      <div className="p-6 space-y-3">
-        <Link href="/settings">
-          <div className="glass-card p-4 rounded-2xl flex items-center gap-3 hover:border-primary/30 cursor-pointer">
-            <Settings className="w-5 h-5 text-muted-foreground" />
-            <div className="flex flex-col overflow-hidden flex-1">
-              <p className="text-xs font-semibold text-foreground">Settings</p>
-              <p className="text-[10px] text-muted-foreground">Preferences & profile</p>
+      <div className="px-4 pb-8 mt-auto border-t border-border/5 pt-8">
+        <Link href="/settings" className="block mb-8">
+          <div className="glass-card p-4 rounded-2xl flex items-center gap-3 hover:border-primary/30 cursor-pointer transition-all hover:bg-accent/50 group">
+            <div className="w-10 h-10 rounded-full border border-primary/20 bg-accent flex items-center justify-center text-sm font-bold text-foreground group-hover:border-primary transition-colors">
+              {session?.user?.name?.[0] || "U"}
             </div>
+            <div className="flex flex-col overflow-hidden flex-1 text-left">
+              <p className="text-xs font-semibold text-foreground truncate">{name || session?.user?.name || "Athlete"}</p>
+              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
+                <span className="uppercase tracking-wider">{belt ? `${belt} Belt` : "White Belt"}</span>
+              </div>
+            </div>
+            <Settings className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
         </Link>
 
-        <div className="glass-card p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full border border-primary/20 bg-accent flex items-center justify-center text-sm font-bold text-foreground">
-            {session?.user?.name?.[0] || "U"}
-          </div>
-          <div className="flex flex-col overflow-hidden flex-1">
-            <p className="text-xs font-semibold text-foreground truncate">{name || session?.user?.name || "Athlete"}</p>
-            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-              {belt ? `${belt} Belt` : "White Belt"}
-            </p>
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
+        <button
           onClick={() => signOut({ callbackUrl: "/auth/login" })}
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:border-destructive/30"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground group cursor-pointer"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="text-xl transition-colors group-hover:text-primary" />
           Sign Out
-        </Button>
+        </button>
       </div>
     </aside>
   )

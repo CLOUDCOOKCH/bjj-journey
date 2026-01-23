@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ButtonLoader } from "@/components/loading/button-loader"
 
 interface BeltNodeProps {
   icon: React.ReactNode
@@ -310,18 +311,17 @@ export default function LoginPage() {
               </p>
             )}
 
-            <Button
-              type="submit"
-              className="w-full bg-[#2dd4bf] text-[#020617] font-bold py-4 rounded-xl shadow-lg shadow-[#2dd4bf]/20 hover:bg-[#26b4a3] hover:shadow-xl hover:shadow-[#2dd4bf]/30 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
-              disabled={isLoading}
-            >
-              {isLoading ? "Signing in..." : (
-                <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </Button>
+            {isLoading ? (
+              <ButtonLoader text="Signing in..." className="w-full bg-[#2dd4bf] text-[#020617] font-bold py-4 rounded-xl shadow-lg shadow-[#2dd4bf]/20 hover:bg-[#26b4a3] hover:shadow-xl hover:shadow-[#2dd4bf]/30 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2" />
+            ) : (
+              <Button
+                type="submit"
+                className="w-full bg-[#2dd4bf] text-[#020617] font-bold py-4 rounded-xl shadow-lg shadow-[#2dd4bf]/20 hover:bg-[#26b4a3] hover:shadow-xl hover:shadow-[#2dd4bf]/30 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <span>Sign In</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            )}
           </form>
 
           <p className="mt-10 text-center text-slate-400">

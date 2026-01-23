@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useCreateJournalEntry, useCreateTechnique, journalEntryKeys } from "@/lib/hooks"
 import { getTodayAsYYYYMMDD } from "@/lib/utils/date"
 import { getSessionTypeLabel, getSessionTypeBadgeColor } from "@/lib/utils/calendar-stats"
+import { ButtonLoader } from "@/components/loading/button-loader"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -255,14 +256,17 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
           >
             Cancel
           </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
-          >
-            {isLoading ? "Saving..." : "Save Entry"}
-          </Button>
+          {isLoading ? (
+            <ButtonLoader text="Saving..." className="bg-blue-600 hover:bg-blue-700 transition-all duration-200" />
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSave}
+              className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+            >
+              Save Entry
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -12,6 +12,7 @@ import { QuickActions } from "@/components/quick-actions"
 import { AchievementCard } from "@/components/achievement-card"
 import { useProfile, useJournalEntries, useAchievements } from "@/lib/hooks"
 import { isDateOnOrAfter, isDateBetween, compareDates, formatDateToYYYYMMDD } from "@/lib/utils/date"
+import { DashboardSkeleton } from "@/components/loading/page-skeleton"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -24,19 +25,7 @@ export default function DashboardPage() {
   const { data: achievements = [], isLoading: achievementsLoading } = useAchievements(isAuthenticated)
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-background">
-        <SidebarNav belt={profile?.belt} />
-        <MobileBottomNav />
-        <main className="lg:ml-64 pb-20 lg:pb-8">
-          <div className="container mx-auto px-4 lg:px-8 py-8">
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   if (!userId) {
@@ -45,19 +34,7 @@ export default function DashboardPage() {
 
   // Show loading state while fetching
   if (profileLoading || entriesLoading || achievementsLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SidebarNav belt={profile?.belt} />
-        <MobileBottomNav />
-        <main className="lg:ml-64 pb-20 lg:pb-8">
-          <div className="container mx-auto px-4 lg:px-8 py-8">
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
+    return <DashboardSkeleton belt={profile?.belt} />
   }
 
   // Get recent entries (limit 3)

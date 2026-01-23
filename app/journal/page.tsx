@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ButtonLoader } from "@/components/loading/button-loader"
 import {
   Search,
   Calendar,
@@ -43,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useQueryClient } from "@tanstack/react-query"
+import { JournalSkeleton } from "@/components/loading/page-skeleton"
 
 const sessionTypes = [
   { value: "all", label: "All" },
@@ -133,19 +135,7 @@ export default function JournalPage() {
   )
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-background">
-        <SidebarNav />
-        <MobileBottomNav />
-        <main className="lg:ml-64 pb-20 lg:pb-8">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
+    return <JournalSkeleton />
   }
 
   if (!session?.user?.id) {
@@ -153,19 +143,7 @@ export default function JournalPage() {
   }
 
   if (isLoading || profileLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SidebarNav />
-        <MobileBottomNav />
-        <main className="lg:ml-64 pb-20 lg:pb-8">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
+    return <JournalSkeleton belt={profile?.belt} />
   }
 
   const getSessionTypeBadge = (type: string) => {
@@ -462,14 +440,18 @@ export default function JournalPage() {
 
                 {filteredEntries.length < totalEntries && (
                   <div className="mt-12 flex flex-col items-center gap-6">
-                    <Button
-                      onClick={() => fetchNextPage()}
-                      disabled={!hasNextPage || isFetchingNextPage}
-                      variant="outline"
-                      className="rounded-full"
-                    >
-                      {isFetchingNextPage ? "Loading..." : "Load more sessions"}
-                    </Button>
+                    {isFetchingNextPage ? (
+                      <ButtonLoader text="Loading sessions..." variant="outline" className="rounded-full" />
+                    ) : (
+                      <Button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage}
+                        variant="outline"
+                        className="rounded-full"
+                      >
+                        Load more sessions
+                      </Button>
+                    )}
                     {showingText && (
                       <p className="text-xs text-muted-foreground uppercase tracking-widest">{showingText}</p>
                     )}

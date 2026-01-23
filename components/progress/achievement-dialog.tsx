@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useCreateAchievement, achievementKeys } from "@/lib/hooks"
 import { BELT_COLORS, type BeltRank } from "@/lib/constants/belt-progression"
 import type { Achievement } from "@/lib/db/schema"
+import { ButtonLoader } from "@/components/loading/button-loader"
 
 interface AchievementDialogProps {
   isOpen: boolean
@@ -258,14 +259,17 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
           >
             Cancel
           </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isLoading}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20"
-          >
-            {isLoading ? "Saving..." : "Save Achievement"}
-          </Button>
+          {isLoading ? (
+            <ButtonLoader text="Saving..." className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20" />
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSave}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20"
+            >
+              Save Achievement
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
