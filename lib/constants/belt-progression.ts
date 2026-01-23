@@ -76,3 +76,29 @@ export function calculateSessionsUntilNextStripe(sessionsSincePromotion: number,
   const sessionsForCurrentStripe = sessionsSincePromotion % sessionsPerStripe
   return sessionsPerStripe - sessionsForCurrentStripe
 }
+
+/**
+ * Helper to extract belt info from achievement title
+ */
+export function parseBeltInfo(title: string, type: string) {
+  const lowerTitle = title.toLowerCase()
+
+  if (type === 'belt') {
+    // Find which belt is mentioned in the title
+    const belt = Object.keys(BELT_COLORS).find((b) =>
+      lowerTitle.includes(b)
+    ) as BeltRank | undefined
+    return { belt: belt || null, stripe: null }
+  } else {
+    // For stripes, extract the stripe number
+    const match = lowerTitle.match(/(\d+)(?:st|nd|rd|th)?\s+stripe/)
+    const stripeNumber = match ? parseInt(match[1]) : null
+
+    // Also try to find which belt this stripe is for
+    const belt = Object.keys(BELT_COLORS).find((b) =>
+      lowerTitle.includes(b)
+    ) as BeltRank | undefined
+
+    return { belt: belt || null, stripe: stripeNumber }
+  }
+}

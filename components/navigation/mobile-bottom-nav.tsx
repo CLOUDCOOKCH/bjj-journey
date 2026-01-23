@@ -15,7 +15,10 @@ export function MobileBottomNav() {
   const pathname = usePathname()
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 w-full h-16 bg-card/90 backdrop-blur-lg border-t border-border flex items-center justify-around px-4 z-50">
+    <div
+      className="lg:hidden fixed bottom-0 left-0 w-full h-16 bg-card/90 backdrop-blur-lg border-t border-border flex items-center justify-around px-4 z-50"
+      style={{ viewTransitionName: 'mobile-nav' } as React.CSSProperties}
+    >
       {navItems.map((item) => {
         const Icon = item.icon
         const isActive = pathname === item.href

@@ -38,6 +38,9 @@ export function useProgressStats(
 ) {
   const { status } = useSession()
 
+  // Need to ensure we have the array or empty array
+  const achievements = _achievements || []
+
   return useQuery<BeltProgressStats>({
     queryKey: progressKeys.stats(),
     queryFn: () => {
@@ -47,7 +50,8 @@ export function useProgressStats(
 
       return calculateBeltProgress(
         profile,
-        journalEntries || []
+        journalEntries || [],
+        achievements
       )
     },
     enabled:

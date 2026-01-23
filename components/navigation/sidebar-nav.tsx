@@ -24,7 +24,10 @@ export function SidebarNav({ belt }: SidebarNavProps) {
   const { data: session } = useSession()
 
   return (
-    <aside className="fixed left-0 top-0 hidden lg:flex h-full w-64 flex-col border-r border-border bg-card/50 backdrop-blur-xl z-50">
+    <aside
+      className="fixed left-0 top-0 hidden lg:flex h-full w-64 flex-col border-r border-border bg-card/50 backdrop-blur-xl z-50"
+      style={{ viewTransitionName: 'sidebar' } as React.CSSProperties}
+    >
       {/* Logo */}
       <div className="p-8">
         <Link href="/dashboard" className="flex items-center gap-3">
@@ -42,11 +45,10 @@ export function SidebarNav({ belt }: SidebarNavProps) {
           const isActive = pathname === item.href
           return (
             <Link key={item.href} href={item.href}>
-              <div className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                isActive
+              <div className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              }`}>
+                }`}>
                 <Icon className="text-xl transition-colors group-hover:text-primary" />
                 {item.label}
               </div>

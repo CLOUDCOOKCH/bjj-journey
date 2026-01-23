@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Award, Trash2, Medal } from "lucide-react"
-import { BELT_COLORS, type BeltRank } from "@/lib/constants/belt-progression"
+import { BELT_COLORS, type BeltRank, parseBeltInfo } from "@/lib/constants/belt-progression"
 import type { Achievement } from "@/lib/db/schema"
 
 interface AchievementTimelineProps {
@@ -11,29 +11,7 @@ interface AchievementTimelineProps {
   onDelete?: (id: string) => void
 }
 
-// Helper to extract belt info from achievement title
-function parseBeltInfo(title: string, type: string) {
-  const lowerTitle = title.toLowerCase()
 
-  if (type === 'belt') {
-    // Find which belt is mentioned in the title
-    const belt = Object.keys(BELT_COLORS).find((b) =>
-      lowerTitle.includes(b)
-    ) as BeltRank | undefined
-    return { belt: belt || null, stripe: null }
-  } else {
-    // For stripes, extract the stripe number
-    const match = lowerTitle.match(/(\d+)(?:st|nd|rd|th)?\s+stripe/)
-    const stripeNumber = match ? parseInt(match[1]) : null
-
-    // Also try to find which belt this stripe is for
-    const belt = Object.keys(BELT_COLORS).find((b) =>
-      lowerTitle.includes(b)
-    ) as BeltRank | undefined
-
-    return { belt: belt || null, stripe: stripeNumber }
-  }
-}
 
 // Visual belt component with stripes
 function VisualBelt({

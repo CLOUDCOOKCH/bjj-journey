@@ -3,7 +3,8 @@
  */
 
 import { JournalEntry } from '@/lib/db/schema'
-import { BeltRank, getNextBelt, TIME_REQUIREMENTS, calculateSessionsUntilNextStripe } from '@/lib/constants/belt-progression'
+import { BeltRank, getNextBelt, TIME_REQUIREMENTS, calculateSessionsUntilNextStripe, parseBeltInfo } from '@/lib/constants/belt-progression'
+import type { Achievement } from '@/lib/db/schema'
 
 export interface BeltProgressStats {
   currentBelt: BeltRank
@@ -19,13 +20,26 @@ export interface BeltProgressStats {
  */
 export function calculateBeltProgress(
   profile: { belt: string; stripes: number; currentBeltDate: string | null },
-  journalEntries: JournalEntry[]
+  journalEntries: JournalEntry[],
+  achievements: Achievement[] = []
 ): BeltProgressStats {
   const currentBelt = profile.belt as BeltRank
   const currentStripes = profile.stripes || 0
 
-  // Calculate sessions since last promotion
-  const promotionDate = profile.currentBeltDate ? new Date(profile.currentBeltDate) : null
+  // Determine promotion date from achievements or profile
+  let promotionDate: Date | null = profile.currentBeltDate ? new Date(profile.currentBeltDate) : null
+
+  // Try to find the specific promotion achievement for the current belt
+  // This is often more accurate than the profile date if manually updated
+  const beltAchievement = achievements.find(a => {
+    const info = parseBeltInfo(a.title, 'belt')
+    return a.type === 'belt' && info.belt === currentBelt
+  })
+
+  // If we found a matching belt achievement, use its date
+  if (beltAchievement) {
+    promotionDate = new Date(beltAchievement.achievedDate)
+  }
   const sessionsSincePromotion = promotionDate
     ? journalEntries.filter(e => new Date(e.entryDate) >= promotionDate).length
     : journalEntries.length
