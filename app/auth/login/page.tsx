@@ -55,7 +55,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-white mb-2">Jiu-Jitsu Tracker</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Jiu-Jitsu Journey</h1>
           <p className="text-slate-400">Track your journey to black belt</p>
         </div>
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">

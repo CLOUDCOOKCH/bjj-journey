@@ -28,7 +28,7 @@ export function AppNav() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="text-xl font-bold text-white hover:text-blue-400 transition-colors">
-              Jiu-Jitsu Tracker
+              Jiu-Jitsu Journey
             </Link>
             <div className="hidden md:flex items-center gap-2">
               {navItems.map((item) => {

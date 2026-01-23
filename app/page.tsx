@@ -6,7 +6,7 @@ export default function Home() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
       <div className="max-w-3xl text-center space-y-8">
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <h1 className="text-6xl font-bold text-white tracking-tight">Jiu-Jitsu Tracker</h1>
+          <h1 className="text-6xl font-bold text-white tracking-tight">Jiu-Jitsu Journey</h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Track your training sessions, document techniques, and monitor your progress on the journey to black belt.
           </p>
