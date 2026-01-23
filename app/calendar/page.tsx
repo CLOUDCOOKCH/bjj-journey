@@ -63,7 +63,7 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SidebarNav />
+      <SidebarNav belt={profile?.belt} name={profile?.user?.name || undefined} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
         <CalendarHeader currentDate={new Date()} userName={session?.user?.name?.split(" ")[0]} />
@@ -73,9 +73,9 @@ export default function CalendarPage() {
               <CalendarView entries={entries || []} userId={userId} onAddPastSession={handleAddPastSession} />
             </div>
             <div className="lg:col-span-1">
-              <CalendarSidebar 
-                entries={entries || []} 
-                monthlyGoal={monthlyGoal} 
+              <CalendarSidebar
+                entries={entries || []}
+                monthlyGoal={monthlyGoal}
                 onAddPastSession={handleAddPastSession}
               />
             </div>

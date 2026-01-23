@@ -17,9 +17,10 @@ const navItems = [
 
 interface SidebarNavProps {
   belt?: string
+  name?: string
 }
 
-export function SidebarNav({ belt }: SidebarNavProps) {
+export function SidebarNav({ belt, name }: SidebarNavProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
 
@@ -46,8 +47,8 @@ export function SidebarNav({ belt }: SidebarNavProps) {
           return (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive
-                  ? "bg-primary/10 text-primary border border-primary/20"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                ? "bg-primary/10 text-primary border border-primary/20"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}>
                 <Icon className="text-xl transition-colors group-hover:text-primary" />
                 {item.label}
@@ -74,7 +75,7 @@ export function SidebarNav({ belt }: SidebarNavProps) {
             {session?.user?.name?.[0] || "U"}
           </div>
           <div className="flex flex-col overflow-hidden flex-1">
-            <p className="text-xs font-semibold text-foreground truncate">{session?.user?.name || "Athlete"}</p>
+            <p className="text-xs font-semibold text-foreground truncate">{name || session?.user?.name || "Athlete"}</p>
             <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
               {belt ? `${belt} Belt` : "White Belt"}
             </p>

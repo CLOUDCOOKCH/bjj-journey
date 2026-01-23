@@ -50,7 +50,7 @@ export default function TechniquesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SidebarNav belt={profile?.belt} />
+      <SidebarNav belt={profile?.belt} name={profile?.user?.name || undefined} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
         <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">

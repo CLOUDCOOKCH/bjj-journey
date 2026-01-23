@@ -4,22 +4,22 @@ import { redirect } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
-import { 
-  useInfiniteJournalEntries, 
-  useDeleteJournalEntry, 
+import {
+  useInfiniteJournalEntries,
+  useDeleteJournalEntry,
   journalEntryKeys,
   useProfile,
-  type JournalEntryWithTechniques 
+  type JournalEntryWithTechniques
 } from "@/lib/hooks"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Search, 
-  Calendar, 
-  Clock, 
-  Zap, 
+import {
+  Search,
+  Calendar,
+  Clock,
+  Zap,
   BookOpen,
   Tag,
   Filter,
@@ -114,20 +114,20 @@ export default function JournalPage() {
 
   const filteredEntries = useMemo(() => {
     return allEntries.filter((entry: JournalEntryWithTechniques) => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         entry.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.notes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        entry.techniques.some(t => 
+        entry.techniques.some(t =>
           t.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
-      
+
       const matchesType = selectedType === "all" || entry.sessionType === selectedType
 
       return matchesSearch && matchesType
     })
   }, [allEntries, searchQuery, selectedType])
 
-  const selectedSortLabel = useMemo(() => 
+  const selectedSortLabel = useMemo(() =>
     sortOptions.find(opt => opt.value === selectedSort)?.label || "Latest First",
     [sortOptions, selectedSort]
   )
@@ -205,13 +205,13 @@ export default function JournalPage() {
   }
 
   const displayedCount = filteredEntries.length
-  const showingText = totalEntries > 0 
+  const showingText = totalEntries > 0
     ? `Showing 1-${displayedCount} of ${totalEntries} total session${totalEntries === 1 ? '' : 's'}`
     : ""
 
   return (
     <div className="min-h-screen bg-background">
-      <SidebarNav belt={profile?.belt} />
+      <SidebarNav belt={profile?.belt} name={profile?.user?.name || undefined} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
         <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">
@@ -281,9 +281,8 @@ export default function JournalPage() {
                           setSelectedSort(option.value)
                           setIsSortOpen(false)
                         }}
-                        className={`w-full px-4 py-2 text-left text-sm hover:bg-accent transition-colors ${
-                          selectedSort === option.value ? "bg-accent text-foreground" : "text-muted-foreground"
-                        }`}
+                        className={`w-full px-4 py-2 text-left text-sm hover:bg-accent transition-colors ${selectedSort === option.value ? "bg-accent text-foreground" : "text-muted-foreground"
+                          }`}
                       >
                         {option.label}
                       </button>
@@ -364,9 +363,8 @@ export default function JournalPage() {
                                         {[1, 2, 3, 4, 5].map((i) => (
                                           <div
                                             key={i}
-                                            className={`w-1.5 h-3 rounded-full ${
-                                              i <= (entry.intensityLevel || 0) ? getIntensityColor(entry.intensityLevel) : "bg-border"
-                                            }`}
+                                            className={`w-1.5 h-3 rounded-full ${i <= (entry.intensityLevel || 0) ? getIntensityColor(entry.intensityLevel) : "bg-border"
+                                              }`}
                                           />
                                         ))}
                                       </div>
@@ -439,23 +437,23 @@ export default function JournalPage() {
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
-                               </div>
-                             </div>
-                           </Link>
- 
-                           <div className="hidden lg:flex absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity items-center gap-2">
-                             <Button
-                               variant="ghost"
-                               size="icon"
-                               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                               onClick={(e) => {
-                                 e.preventDefault()
-                                 setEntryToDelete(entry.id)
-                               }}
-                             >
-                               <Trash2 className="h-4 w-4" />
-                             </Button>
-                           </div>
+                              </div>
+                            </div>
+                          </Link>
+
+                          <div className="hidden lg:flex absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                setEntryToDelete(entry.id)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </Card>
                       </div>
                     )

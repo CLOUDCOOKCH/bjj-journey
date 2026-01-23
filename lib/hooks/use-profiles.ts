@@ -3,8 +3,16 @@
 import { useSession } from 'next-auth/react'
 import { useMutation, useQuery, type UseMutationOptions } from '@tanstack/react-query'
 import { get, patch } from '@/lib/api/client'
-import type { Profile } from '@/lib/db/schema'
+import type { Profile, User } from '@/lib/db/schema'
 import type { ProfileUpdateInput } from '@/lib/validations/schema'
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export type ProfileWithUser = Profile & {
+  user: User
+}
 
 // ============================================================================
 // Query Keys
@@ -27,7 +35,7 @@ export function useProfile(enabled?: boolean) {
 
   return useQuery({
     queryKey: profileKeys.detail(),
-    queryFn: () => get<Profile>('/api/profiles'),
+    queryFn: () => get<ProfileWithUser>('/api/profiles'),
     enabled: enabled ?? status === 'authenticated',
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
@@ -41,11 +49,11 @@ export function useProfile(enabled?: boolean) {
  * Update the current user's profile
  */
 export function useUpdateProfile(
-  options?: Omit<UseMutationOptions<Profile, Error, ProfileUpdateInput>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<ProfileWithUser, Error, ProfileUpdateInput>, 'mutationFn'>
 ) {
   return useMutation({
     ...options,
     mutationFn: (data: ProfileUpdateInput) =>
-      patch<Profile>('/api/profiles', data),
+      patch<ProfileWithUser>('/api/profiles', data),
   })
 }

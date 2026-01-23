@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api/auth'
 import { db } from '@/lib/db'
-import { profiles } from '@/lib/db/schema'
+import { profiles, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { profileUpdateSchema } from '@/lib/validations/schema'
 import { handleApiError, ApiError } from '@/lib/api/errors'
@@ -12,6 +12,9 @@ export async function GET() {
 
     const profile = await db.query.profiles.findFirst({
       where: eq(profiles.id, user.id!),
+      with: {
+        user: true
+      }
     })
 
     if (!profile) {
@@ -22,7 +25,15 @@ export async function GET() {
         monthlyGoal: 12,
       }).returning()
 
-      return NextResponse.json(newProfile[0])
+      // Fetch the created profile with user data
+      const createdProfile = await db.query.profiles.findFirst({
+        where: eq(profiles.id, user.id!),
+        with: {
+          user: true
+        }
+      })
+
+      return NextResponse.json(createdProfile)
     }
 
     return NextResponse.json(profile)
@@ -35,21 +46,42 @@ export async function PATCH(request: NextRequest) {
   try {
     const user = await requireAuth()
     const body = await request.json()
-    const data = profileUpdateSchema.parse(body)
+    const { name, ...profileData } = profileUpdateSchema.parse(body)
 
-    const updated = await db.update(profiles)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-      })
-      .where(eq(profiles.id, user.id!))
-      .returning()
+    // Update user name if provided
+    if (name) {
+      await db.update(users)
+        .set({
+          name,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, user.id!))
+    }
 
-    if (!updated[0]) {
+    // Update profile data if generic profile fields are provided
+    if (Object.keys(profileData).length > 0) {
+      await db.update(profiles)
+        .set({
+          ...profileData,
+          updatedAt: new Date(),
+        })
+        .where(eq(profiles.id, user.id!))
+        .returning()
+    }
+
+    // Return the full updated profile with user data
+    const updatedProfile = await db.query.profiles.findFirst({
+      where: eq(profiles.id, user.id!),
+      with: {
+        user: true
+      }
+    })
+
+    if (!updatedProfile) {
       throw new ApiError(404, 'Profile not found')
     }
 
-    return NextResponse.json(updated[0])
+    return NextResponse.json(updatedProfile)
   } catch (error) {
     return handleApiError(error)
   }

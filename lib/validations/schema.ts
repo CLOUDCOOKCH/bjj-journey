@@ -31,6 +31,7 @@ export const profileUpdateSchema = z.object({
     .nullable()
     .optional(),
   monthlyGoal: z.number().int().min(1).max(31).optional(),
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
 })
 
 // ============================================================================
@@ -44,8 +45,8 @@ export const journalEntrySchema = z.object({
       const [year, month, day] = val.split('-').map(Number)
       const date = new Date(year, month - 1, day)
       return date.getFullYear() === year &&
-             date.getMonth() === month - 1 &&
-             date.getDate() === day
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
     }, {
       message: 'Invalid date (e.g., February 30 is not valid)',
     }),
@@ -99,8 +100,8 @@ export const achievementSchema = z.object({
       const [year, month, day] = val.split('-').map(Number)
       const date = new Date(year, month - 1, day)
       return date.getFullYear() === year &&
-             date.getMonth() === month - 1 &&
-             date.getDate() === day
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
     }, {
       message: 'Invalid date (e.g., February 30 is not valid)',
     }),

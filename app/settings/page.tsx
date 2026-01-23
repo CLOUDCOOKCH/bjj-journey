@@ -6,6 +6,7 @@ import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { BeltSettings } from "@/components/belt-settings"
 import { FrequencyGoalSettings } from "@/components/frequency-goal-settings"
+import { ProfileSettings } from "@/components/profile-settings"
 
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions)
@@ -34,10 +35,11 @@ export default async function SettingsPage() {
   }
 
   const profile = await profileRes.json()
+  const userName = profile?.user?.name || session.user.name || ""
 
   return (
     <div className="min-h-screen bg-background">
-      <SidebarNav />
+      <SidebarNav belt={profile?.belt} name={userName} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -47,6 +49,7 @@ export default async function SettingsPage() {
           </div>
 
           <div className="space-y-6">
+            <ProfileSettings initialName={userName} userId={userId} />
             <BeltSettings currentBelt={profile?.belt || "white"} userId={userId} />
             <FrequencyGoalSettings currentGoal={profile?.monthlyGoal || 12} userId={userId} />
           </div>

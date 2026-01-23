@@ -143,7 +143,7 @@ export default function AchievementsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SidebarNav belt={profile?.belt} />
+      <SidebarNav belt={profile?.belt} name={profile?.user?.name || undefined} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
 
