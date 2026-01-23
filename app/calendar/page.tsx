@@ -1,40 +1,37 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { cookies } from "next/headers"
 import CalendarView from "@/components/calendar-view"
 import { AppNav } from "@/components/app-nav"
 
 export default async function CalendarPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
     redirect("/auth/login")
   }
 
-  // Fetch journal entries for the current user
-  const { data: entries, error } = await supabase
-    .from("journal_entries")
-    .select(
-      `
-      id,
-      entry_date,
-      notes,
-      techniques (
-        id,
-        name,
-        youtube_url,
-        notes
-      )
-    `,
-    )
-    .eq("user_id", user.id)
-    .order("entry_date", { ascending: false })
+  const userId = session.user.id
 
-  if (error) {
-    console.error("Error fetching entries:", error)
+  // Get cookies to pass to API routes
+  const cookieStore = await cookies()
+  const cookieHeader = Array.from(cookieStore.getAll())
+    .map(cookie => `${cookie.name}=${cookie.value}`)
+    .join('; ')
+
+  // Fetch journal entries from API
+  const entriesRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/journal-entries`, {
+    cache: 'no-store',
+    headers: {
+      cookie: cookieHeader,
+    },
+  })
+
+  if (!entriesRes.ok) {
+    throw new Error('Failed to fetch entries')
   }
+
+  const entries = await entriesRes.json()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -44,7 +41,7 @@ export default async function CalendarPage() {
           <h1 className="text-4xl font-bold text-white mb-2">Training Calendar</h1>
           <p className="text-slate-400">Track your training sessions and review your progress</p>
         </div>
-        <CalendarView entries={entries || []} userId={user.id} />
+        <CalendarView entries={entries || []} userId={userId} />
       </main>
     </div>
   )

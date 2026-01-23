@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 interface AddAchievementDialogProps {
@@ -30,18 +29,23 @@ export function AddAchievementDialog({ isOpen, onClose, userId }: AddAchievement
     }
 
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      const { error } = await supabase.from("achievements").insert({
-        user_id: userId,
-        type,
-        title: title.trim(),
-        description: description.trim() || null,
-        achieved_date: achievedDate,
+      const res = await fetch("/api/achievements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          title: title.trim(),
+          description: description.trim() || null,
+          achievedDate: achievedDate,
+        }),
       })
 
-      if (error) throw error
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to add achievement")
+      }
 
       router.refresh()
       onClose()

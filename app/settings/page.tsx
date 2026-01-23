@@ -1,29 +1,50 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { cookies } from "next/headers"
 import { AppNav } from "@/components/app-nav"
 import { BeltSettings } from "@/components/belt-settings"
 import { AchievementsList } from "@/components/achievements-list"
 import { FrequencyGoalSettings } from "@/components/frequency-goal-settings"
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
     redirect("/auth/login")
   }
 
-  // Fetch profile
-  const { data: profile } = await supabase.from("profiles").select("*", { count: "exact" }).eq("id", user.id).single()
+  const userId = session.user.id
 
-  // Fetch achievements
-  const { data: achievements } = await supabase
-    .from("achievements")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("achieved_date", { ascending: false })
+  // Get cookies to pass to API routes
+  const cookieStore = await cookies()
+  const cookieHeader = Array.from(cookieStore.getAll())
+    .map(cookie => `${cookie.name}=${cookie.value}`)
+    .join('; ')
+
+  // Fetch data from API
+  const [profileRes, achievementsRes] = await Promise.all([
+    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/profiles`, {
+      cache: 'no-store',
+      headers: {
+        cookie: cookieHeader,
+      },
+    }),
+    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/achievements`, {
+      cache: 'no-store',
+      headers: {
+        cookie: cookieHeader,
+      },
+    }),
+  ])
+
+  if (!profileRes.ok || !achievementsRes.ok) {
+    throw new Error('Failed to fetch data')
+  }
+
+  const [profile, achievements] = await Promise.all([
+    profileRes.json(),
+    achievementsRes.json(),
+  ])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -35,9 +56,9 @@ export default async function SettingsPage() {
         </div>
 
         <div className="space-y-6">
-          <BeltSettings currentBelt={profile?.belt || "white"} userId={user.id} />
-          <FrequencyGoalSettings currentGoal={profile?.monthly_goal || 12} userId={user.id} />
-          <AchievementsList achievements={achievements || []} userId={user.id} />
+          <BeltSettings currentBelt={profile?.belt || "white"} userId={userId} />
+          <FrequencyGoalSettings currentGoal={profile?.monthlyGoal || 12} userId={userId} />
+          <AchievementsList achievements={achievements || []} userId={userId} />
         </div>
       </main>
     </div>

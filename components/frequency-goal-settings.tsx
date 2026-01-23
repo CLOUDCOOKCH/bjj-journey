@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Target } from "lucide-react"
 
@@ -21,18 +20,18 @@ export function FrequencyGoalSettings({ currentGoal, userId }: FrequencyGoalSett
 
   const handleSave = async () => {
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          monthly_goal: goal,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId)
+      const res = await fetch("/api/profiles", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monthlyGoal: goal }),
+      })
 
-      if (error) throw error
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to update goal")
+      }
 
       router.refresh()
     } catch (error) {

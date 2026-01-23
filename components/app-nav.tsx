@@ -4,16 +4,15 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Calendar, LayoutDashboard, Settings, LogOut } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { signOut } from "next-auth/react"
 
 export function AppNav() {
   const pathname = usePathname()
   const router = useRouter()
 
   const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push("/")
+    await signOut({ redirect: false })
+    router.push("/auth/login")
     router.refresh()
   }
 

@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Plus, Trophy, AwardIcon, Trash2 } from "lucide-react"
 import { AddAchievementDialog } from "@/components/add-achievement-dialog"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 interface Achievement {
@@ -13,7 +12,7 @@ interface Achievement {
   type: string
   title: string
   description: string | null
-  achieved_date: string
+  achievedDate: string
 }
 
 interface AchievementsListProps {
@@ -30,12 +29,16 @@ export function AchievementsList({ achievements, userId }: AchievementsListProps
     if (!confirm("Are you sure you want to delete this achievement?")) return
 
     setDeletingId(id)
-    const supabase = createClient()
 
     try {
-      const { error } = await supabase.from("achievements").delete().eq("id", id)
+      const res = await fetch(`/api/achievements/${id}`, {
+        method: "DELETE",
+      })
 
-      if (error) throw error
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to delete achievement")
+      }
 
       router.refresh()
     } catch (error) {
@@ -102,7 +105,7 @@ export function AchievementsList({ achievements, userId }: AchievementsListProps
                           <div className="flex-1">
                             <h4 className="text-lg font-semibold text-white">{achievement.title}</h4>
                             <p className="text-sm text-slate-300 mt-1">
-                              {new Date(achievement.achieved_date).toLocaleDateString("en-US", {
+                              {new Date(achievement.achievedDate).toLocaleDateString("en-US", {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",

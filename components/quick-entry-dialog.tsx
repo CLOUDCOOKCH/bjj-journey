@@ -7,12 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, X, Youtube } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 interface Technique {
   name: string
-  youtube_url: string
+  youtubeUrl: string
   notes: string
 }
 
@@ -36,7 +35,7 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
   }
 
   const addTechnique = () => {
-    setTechniques([...techniques, { name: "", youtube_url: "", notes: "" }])
+    setTechniques([...techniques, { name: "", youtubeUrl: "", notes: "" }])
   }
 
   const removeTechnique = (index: number) => {
@@ -51,34 +50,50 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
 
   const handleSave = async () => {
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
       // Create new entry
-      const { data: entryData, error: entryError } = await supabase
-        .from("journal_entries")
-        .insert({
-          user_id: userId,
-          entry_date: entryDate,
+      const entryRes = await fetch("/api/journal-entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryDate,
           notes,
-        })
-        .select()
-        .single()
+        }),
+      })
 
-      if (entryError) throw entryError
+      if (!entryRes.ok) {
+        const data = await entryRes.json()
+        throw new Error(data.error || "Failed to create entry")
+      }
+
+      const entryData = await entryRes.json()
 
       // Insert techniques
-      if (techniques.length > 0 && entryData) {
-        const { error: techniquesError } = await supabase.from("techniques").insert(
-          techniques.map((t) => ({
-            journal_entry_id: entryData.id,
-            name: t.name,
-            youtube_url: t.youtube_url || null,
-            notes: t.notes || null,
-          })),
-        )
+      if (techniques.length > 0) {
+        const techniquePromises = techniques
+          .filter((t) => t.name.trim())
+          .map((t) =>
+            fetch("/api/techniques", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                journalEntryId: entryData.id,
+                name: t.name,
+                youtubeUrl: t.youtubeUrl || null,
+                notes: t.notes || null,
+              }),
+            })
+          )
 
-        if (techniquesError) throw techniquesError
+        const results = await Promise.all(techniquePromises)
+
+        for (const res of results) {
+          if (!res.ok) {
+            const data = await res.json()
+            throw new Error(data.error || "Failed to create technique")
+          }
+        }
       }
 
       router.refresh()
@@ -157,8 +172,8 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
                       <Youtube className="h-4 w-4 text-red-500 flex-shrink-0" />
                       <Input
                         placeholder="YouTube URL"
-                        value={technique.youtube_url}
-                        onChange={(e) => updateTechnique(index, "youtube_url", e.target.value)}
+                        value={technique.youtubeUrl}
+                        onChange={(e) => updateTechnique(index, "youtubeUrl", e.target.value)}
                         className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
                       />
                     </div>

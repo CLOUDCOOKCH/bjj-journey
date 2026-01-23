@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 interface BeltSettingsProps {
@@ -27,18 +26,18 @@ export function BeltSettings({ currentBelt, userId }: BeltSettingsProps) {
 
   const handleSave = async () => {
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          belt: selectedBelt,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId)
+      const res = await fetch("/api/profiles", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ belt: selectedBelt }),
+      })
 
-      if (error) throw error
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to update belt")
+      }
 
       router.refresh()
     } catch (error) {

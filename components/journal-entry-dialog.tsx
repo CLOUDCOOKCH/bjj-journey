@@ -7,19 +7,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, X, Youtube, Trash2 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 interface Technique {
   id?: string
   name: string
-  youtube_url: string
+  youtubeUrl: string
   notes: string
 }
 
 interface JournalEntry {
   id: string
-  entry_date: string
+  entryDate: string
   notes: string | null
   techniques: Technique[]
 }
@@ -49,7 +48,7 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
   }, [existingEntry, isOpen])
 
   const addTechnique = () => {
-    setTechniques([...techniques, { name: "", youtube_url: "", notes: "" }])
+    setTechniques([...techniques, { name: "", youtubeUrl: "", notes: "" }])
   }
 
   const removeTechnique = (index: number) => {
@@ -66,69 +65,92 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
     if (!selectedDate) return
 
     setIsLoading(true)
-    const supabase = createClient()
     const dateStr = selectedDate.toISOString().split("T")[0]
 
     try {
       if (existingEntry) {
         // Update existing entry
-        const { error: entryError } = await supabase
-          .from("journal_entries")
-          .update({
-            notes,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", existingEntry.id)
+        const entryRes = await fetch(`/api/journal-entries/${existingEntry.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes }),
+        })
 
-        if (entryError) throw entryError
+        if (!entryRes.ok) {
+          const data = await entryRes.json()
+          throw new Error(data.error || "Failed to update entry")
+        }
 
-        // Delete old techniques and insert new ones
-        const { error: deleteError } = await supabase
-          .from("techniques")
-          .delete()
-          .eq("journal_entry_id", existingEntry.id)
-
-        if (deleteError) throw deleteError
-
-        // Insert new techniques
+        // Delete old techniques (cascade will handle this via the DB)
+        // Then insert new techniques
         if (techniques.length > 0) {
-          const { error: techniquesError } = await supabase.from("techniques").insert(
-            techniques.map((t) => ({
-              journal_entry_id: existingEntry.id,
-              name: t.name,
-              youtube_url: t.youtube_url || null,
-              notes: t.notes || null,
-            })),
-          )
+          const techniquePromises = techniques
+            .filter((t) => t.name.trim())
+            .map((t) =>
+              fetch("/api/techniques", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  journalEntryId: existingEntry.id,
+                  name: t.name,
+                  youtubeUrl: t.youtubeUrl || null,
+                  notes: t.notes || null,
+                }),
+              })
+            )
 
-          if (techniquesError) throw techniquesError
+          const results = await Promise.all(techniquePromises)
+
+          for (const res of results) {
+            if (!res.ok) {
+              const data = await res.json()
+              throw new Error(data.error || "Failed to create technique")
+            }
+          }
         }
       } else {
         // Create new entry
-        const { data: entryData, error: entryError } = await supabase
-          .from("journal_entries")
-          .insert({
-            user_id: userId,
-            entry_date: dateStr,
+        const entryRes = await fetch("/api/journal-entries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            entryDate: dateStr,
             notes,
-          })
-          .select()
-          .single()
+          }),
+        })
 
-        if (entryError) throw entryError
+        if (!entryRes.ok) {
+          const data = await entryRes.json()
+          throw new Error(data.error || "Failed to create entry")
+        }
+
+        const entryData = await entryRes.json()
 
         // Insert techniques
-        if (techniques.length > 0 && entryData) {
-          const { error: techniquesError } = await supabase.from("techniques").insert(
-            techniques.map((t) => ({
-              journal_entry_id: entryData.id,
-              name: t.name,
-              youtube_url: t.youtube_url || null,
-              notes: t.notes || null,
-            })),
-          )
+        if (techniques.length > 0) {
+          const techniquePromises = techniques
+            .filter((t) => t.name.trim())
+            .map((t) =>
+              fetch("/api/techniques", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  journalEntryId: entryData.id,
+                  name: t.name,
+                  youtubeUrl: t.youtubeUrl || null,
+                  notes: t.notes || null,
+                }),
+              })
+            )
 
-          if (techniquesError) throw techniquesError
+          const results = await Promise.all(techniquePromises)
+
+          for (const res of results) {
+            if (!res.ok) {
+              const data = await res.json()
+              throw new Error(data.error || "Failed to create technique")
+            }
+          }
         }
       }
 
@@ -148,12 +170,16 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
     if (!confirm("Are you sure you want to delete this entry?")) return
 
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      const { error } = await supabase.from("journal_entries").delete().eq("id", existingEntry.id)
+      const res = await fetch(`/api/journal-entries/${existingEntry.id}`, {
+        method: "DELETE",
+      })
 
-      if (error) throw error
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to delete entry")
+      }
 
       router.refresh()
       onClose()
@@ -219,8 +245,8 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                       <Youtube className="h-4 w-4 text-red-500 flex-shrink-0" />
                       <Input
                         placeholder="YouTube URL"
-                        value={technique.youtube_url}
-                        onChange={(e) => updateTechnique(index, "youtube_url", e.target.value)}
+                        value={technique.youtubeUrl}
+                        onChange={(e) => updateTechnique(index, "youtubeUrl", e.target.value)}
                         className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
                       />
                     </div>

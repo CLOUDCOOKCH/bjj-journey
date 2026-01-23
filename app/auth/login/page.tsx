@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
+import { useEffect } from "react"
 
-import { createClient } from "@/lib/supabase/client"
+import { signIn, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,26 +13,37 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export default function LoginPage() {
+  const { data: session, status } = useSession()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      router.push("/dashboard")
+    }
+  }, [status, session, router])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const result = await signIn("credentials", {
         email,
         password,
+        redirect: false,
       })
-      if (error) throw error
-      router.push("/dashboard")
-      router.refresh()
+
+      if (result?.error) {
+        setError("Invalid email or password")
+      } else {
+        router.push("/dashboard")
+        router.refresh()
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
