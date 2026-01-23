@@ -23,13 +23,13 @@ export const achievementKeys = {
 /**
  * Fetch all achievements for the current user
  */
-export function useAchievements() {
+export function useAchievements(enabled?: boolean) {
   const { status } = useSession()
 
   return useQuery({
     queryKey: achievementKeys.lists(),
     queryFn: () => get<Achievement[]>('/api/achievements'),
-    enabled: status === 'authenticated',
+    enabled: enabled ?? status === 'authenticated',
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }

@@ -15,9 +15,10 @@ export default function DashboardPage() {
 
   // Always call hooks at the top level (Rules of Hooks)
   const userId = session?.user?.id
-  const { data: profile, isLoading: profileLoading } = useProfile()
-  const { data: entries = [], isLoading: entriesLoading } = useJournalEntries()
-  const { data: achievements = [], isLoading: achievementsLoading } = useAchievements()
+  const isAuthenticated = status === 'authenticated'
+  const { data: profile, isLoading: profileLoading } = useProfile(isAuthenticated)
+  const { data: entries = [], isLoading: entriesLoading } = useJournalEntries(isAuthenticated)
+  const { data: achievements = [], isLoading: achievementsLoading } = useAchievements(isAuthenticated)
 
   if (status === "loading") {
     return (
@@ -99,13 +100,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-background">
       <AppNav />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
-            <p className="text-slate-400">Welcome back! Here&apos;s your training overview</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
+            <p className="text-muted-foreground">Welcome back! Here&apos;s your training overview</p>
           </div>
           <QuickEntryButton userId={userId} />
         </div>

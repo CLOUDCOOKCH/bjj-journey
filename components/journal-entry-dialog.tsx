@@ -171,16 +171,16 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="border-slate-800 bg-slate-900 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="border-border bg-background/95 backdrop-blur-xl text-foreground max-w-2xl max-h-[90vh] overflow-y-auto sm:rounded-2xl shadow-2xl shadow-primary/10">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             {selectedDate?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="notes" className="text-slate-200">
+            <Label htmlFor="notes" className="text-foreground font-medium">
               Training Notes (Markdown supported)
             </Label>
             <div data-color-mode="dark" className="w-full">
@@ -192,19 +192,20 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                 textareaProps={{
                   placeholder: "How was today's training? What did you learn?",
                 }}
-                className="bg-slate-800/50 border-slate-700"
+                className="bg-card border-border rounded-lg overflow-hidden"
               />
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-slate-200">Techniques Learned</Label>
+              <Label className="text-foreground font-medium">Techniques Learned</Label>
               <Button
                 type="button"
                 onClick={addTechnique}
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+                variant="outline"
+                className="border-dashed border-primary/40 text-primary hover:bg-primary/10 transition-all duration-200"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Technique
@@ -214,7 +215,7 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
             {techniques.map((technique, index) => (
               <div
                 key={index}
-                className="space-y-3 p-4 bg-slate-800/30 rounded-lg border border-slate-700/50 animate-in fade-in slide-in-from-bottom-4 duration-300"
+                className="space-y-3 p-4 bg-card/60 rounded-xl border border-border/50 animate-in fade-in slide-in-from-bottom-4 duration-300 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 space-y-3">
@@ -222,7 +223,7 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                       placeholder="Technique name (e.g., Kimura from closed guard)"
                       value={technique.name}
                       onChange={(e) => updateTechnique(index, "name", e.target.value)}
-                      className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
                     />
                     <div className="flex items-center gap-2">
                       <Youtube className="h-4 w-4 text-red-500 flex-shrink-0" />
@@ -230,14 +231,14 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                         placeholder="YouTube URL"
                         value={technique.youtubeUrl}
                         onChange={(e) => updateTechnique(index, "youtubeUrl", e.target.value)}
-                        className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                        className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
                       />
                     </div>
                     <Textarea
                       placeholder="Additional notes about this technique..."
                       value={technique.notes}
                       onChange={(e) => updateTechnique(index, "notes", e.target.value)}
-                      className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
                     />
                   </div>
                   <Button
@@ -245,7 +246,7 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                     onClick={() => removeTechnique(index)}
                     size="icon"
                     variant="ghost"
-                    className="text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -262,7 +263,7 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
               onClick={handleDelete}
               variant="outline"
               disabled={isLoading}
-              className="border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-950/50 hover:text-red-300 sm:mr-auto"
+              className="border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive sm:mr-auto"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Entry
@@ -271,9 +272,9 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
           <Button
             type="button"
             onClick={onClose}
-            variant="outline"
+            variant="ghost"
             disabled={isLoading}
-            className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-800"
+            className="text-muted-foreground hover:text-foreground"
           >
             Cancel
           </Button>
@@ -281,7 +282,7 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
             type="button"
             onClick={handleSave}
             disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20"
           >
             {isLoading ? "Saving..." : "Save Entry"}
           </Button>

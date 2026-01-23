@@ -16,9 +16,10 @@ export function QuickEntryButton({ userId }: QuickEntryButtonProps) {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-blue-500/20"
+        className="transition-all duration-200 shadow-lg hover:shadow-primary/20 hover:scale-105 active:scale-95"
+        size="lg"
       >
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="h-5 w-5 mr-2" />
         Quick Entry
       </Button>
       <QuickEntryDialog isOpen={isOpen} onClose={() => setIsOpen(false)} userId={userId} />

@@ -11,7 +11,8 @@ export default function CalendarPage() {
 
   // Always call hooks at the top level (Rules of Hooks)
   const userId = session?.user?.id
-  const { data: entries = [], isLoading } = useJournalEntries()
+  const isAuthenticated = status === 'authenticated'
+  const { data: entries = [], isLoading } = useJournalEntries(isAuthenticated)
 
   if (status === "loading") {
     return (

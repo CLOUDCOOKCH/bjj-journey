@@ -42,7 +42,6 @@ export default function LoginPage() {
         setError("Invalid email or password")
       } else {
         router.push("/dashboard")
-        router.refresh()
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")

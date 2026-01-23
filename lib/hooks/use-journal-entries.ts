@@ -35,13 +35,13 @@ export const journalEntryKeys = {
 /**
  * Fetch all journal entries for the current user
  */
-export function useJournalEntries() {
+export function useJournalEntries(enabled?: boolean) {
   const { status } = useSession()
 
   return useQuery({
     queryKey: journalEntryKeys.lists(),
     queryFn: () => get<JournalEntryWithTechniques[]>('/api/journal-entries'),
-    enabled: status === 'authenticated',
+    enabled: enabled ?? status === 'authenticated',
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }

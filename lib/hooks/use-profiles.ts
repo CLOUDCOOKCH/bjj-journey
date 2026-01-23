@@ -22,13 +22,13 @@ export const profileKeys = {
 /**
  * Fetch the current user's profile
  */
-export function useProfile() {
-  const { data: session, status } = useSession()
+export function useProfile(enabled?: boolean) {
+  const { status } = useSession()
 
   return useQuery({
     queryKey: profileKeys.detail(),
     queryFn: () => get<Profile>('/api/profiles'),
-    enabled: status === 'authenticated',
+    enabled: enabled ?? status === 'authenticated',
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
