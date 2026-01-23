@@ -1,37 +1,47 @@
+"use client"
+
 import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { cookies } from "next/headers"
+import { useSession } from "next-auth/react"
 import CalendarView from "@/components/calendar-view"
 import { AppNav } from "@/components/app-nav"
+import { useJournalEntries } from "@/lib/hooks"
 
-export default async function CalendarPage() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+export default function CalendarPage() {
+  const { data: session, status } = useSession()
+
+  // Always call hooks at the top level (Rules of Hooks)
+  const userId = session?.user?.id
+  const { data: entries = [], isLoading } = useJournalEntries()
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <AppNav />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <p className="text-slate-400">Loading...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!userId) {
     redirect("/auth/login")
   }
 
-  const userId = session.user.id
-
-  // Get cookies to pass to API routes
-  const cookieStore = await cookies()
-  const cookieHeader = Array.from(cookieStore.getAll())
-    .map(cookie => `${cookie.name}=${cookie.value}`)
-    .join('; ')
-
-  // Fetch journal entries from API
-  const entriesRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/journal-entries`, {
-    cache: 'no-store',
-    headers: {
-      cookie: cookieHeader,
-    },
-  })
-
-  if (!entriesRes.ok) {
-    throw new Error('Failed to fetch entries')
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <AppNav />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <p className="text-slate-400">Loading...</p>
+          </div>
+        </main>
+      </div>
+    )
   }
-
-  const entries = await entriesRes.json()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">

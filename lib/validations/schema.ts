@@ -33,7 +33,17 @@ export const profileUpdateSchema = z.object({
 // ============================================================================
 
 export const journalEntrySchema = z.object({
-  entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+  entryDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+    .refine((val) => {
+      const [year, month, day] = val.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
+      return date.getFullYear() === year &&
+             date.getMonth() === month - 1 &&
+             date.getDate() === day
+    }, {
+      message: 'Invalid date (e.g., February 30 is not valid)',
+    }),
   notes: z.string().nullable().optional(),
 })
 
@@ -68,7 +78,17 @@ export const achievementSchema = z.object({
   }),
   title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
   description: z.string().nullable().optional(),
-  achievedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+  achievedDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+    .refine((val) => {
+      const [year, month, day] = val.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
+      return date.getFullYear() === year &&
+             date.getMonth() === month - 1 &&
+             date.getDate() === day
+    }, {
+      message: 'Invalid date (e.g., February 30 is not valid)',
+    }),
 })
 
 // ============================================================================

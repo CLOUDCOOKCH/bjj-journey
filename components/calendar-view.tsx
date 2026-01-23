@@ -5,17 +5,18 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { JournalEntryDialog } from "@/components/journal-entry-dialog"
+import { formatDateToYYYYMMDD } from "@/lib/utils/date"
 
 interface Technique {
   id: string
   name: string
-  youtube_url: string | null
+  youtubeUrl: string | null
   notes: string | null
 }
 
 interface JournalEntry {
   id: string
-  entry_date: string
+  entryDate: string
   notes: string | null
   techniques: Technique[]
 }
@@ -69,9 +70,9 @@ export default function CalendarView({ entries, userId }: CalendarViewProps) {
     setIsDialogOpen(true)
   }
 
-  const getEntryForDate = (day: number): JournalEntry | undefined => {
-    const dateStr = new Date(year, month, day).toISOString().split("T")[0]
-    return entries.find((entry) => entry.entry_date === dateStr)
+  const getEntryForDate = (date: Date): JournalEntry | undefined => {
+    const dateStr = formatDateToYYYYMMDD(date)
+    return entries.find((entry) => entry.entryDate === dateStr)
   }
 
   const calendarDays = []
@@ -80,7 +81,7 @@ export default function CalendarView({ entries, userId }: CalendarViewProps) {
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const entry = getEntryForDate(day)
+    const entry = getEntryForDate(new Date(year, month, day))
     const hasEntry = !!entry
     const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()
 
@@ -174,7 +175,7 @@ export default function CalendarView({ entries, userId }: CalendarViewProps) {
         }}
         selectedDate={selectedDate}
         userId={userId}
-        existingEntry={selectedDate ? getEntryForDate(selectedDate.getDate()) : undefined}
+        existingEntry={selectedDate ? getEntryForDate(selectedDate) : undefined}
       />
     </div>
   )

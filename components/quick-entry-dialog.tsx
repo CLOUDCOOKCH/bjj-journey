@@ -1,13 +1,21 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, X, Youtube } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
+import { useCreateJournalEntry, useCreateTechnique, journalEntryKeys } from "@/lib/hooks"
+import { getTodayAsYYYYMMDD } from "@/lib/utils/date"
+
+const MDEditor = dynamic(
+  () => import("@uiw/react-md-editor").then((mod) => mod.default),
+  { ssr: false }
+)
 
 interface Technique {
   name: string
@@ -22,14 +30,20 @@ interface QuickEntryDialogProps {
 }
 
 export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogProps) {
-  const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0])
+  const [entryDate, setEntryDate] = useState(getTodayAsYYYYMMDD())
   const [notes, setNotes] = useState("")
   const [techniques, setTechniques] = useState<Technique[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+
+  const queryClient = useQueryClient()
+  const createEntry = useCreateJournalEntry({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: journalEntryKeys.lists() })
+    },
+  })
+  const createTechnique = useCreateTechnique()
 
   const resetForm = () => {
-    setEntryDate(new Date().toISOString().split("T")[0])
+    setEntryDate(getTodayAsYYYYMMDD())
     setNotes("")
     setTechniques([])
   }
@@ -49,63 +63,39 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
   }
 
   const handleSave = async () => {
-    setIsLoading(true)
-
+    console.log('Quick entry saving with date:', entryDate, 'type:', typeof entryDate)
     try {
       // Create new entry
-      const entryRes = await fetch("/api/journal-entries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          entryDate,
-          notes,
-        }),
+      const entryData = await createEntry.mutateAsync({
+        entryDate,
+        notes: notes || null,
       })
-
-      if (!entryRes.ok) {
-        const data = await entryRes.json()
-        throw new Error(data.error || "Failed to create entry")
-      }
-
-      const entryData = await entryRes.json()
 
       // Insert techniques
       if (techniques.length > 0) {
-        const techniquePromises = techniques
-          .filter((t) => t.name.trim())
-          .map((t) =>
-            fetch("/api/techniques", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                journalEntryId: entryData.id,
-                name: t.name,
-                youtubeUrl: t.youtubeUrl || null,
-                notes: t.notes || null,
-              }),
+        const validTechniques = techniques.filter((t) => t.name.trim())
+
+        await Promise.all(
+          validTechniques.map((t) =>
+            createTechnique.mutateAsync({
+              journalEntryId: entryData.id,
+              name: t.name,
+              youtubeUrl: t.youtubeUrl || null,
+              notes: t.notes || null,
             })
           )
-
-        const results = await Promise.all(techniquePromises)
-
-        for (const res of results) {
-          if (!res.ok) {
-            const data = await res.json()
-            throw new Error(data.error || "Failed to create technique")
-          }
-        }
+        )
       }
 
-      router.refresh()
       resetForm()
       onClose()
     } catch (error) {
       console.error("Error saving entry:", error)
-      alert("Failed to save entry. Please try again.")
-    } finally {
-      setIsLoading(false)
+      alert(error instanceof Error ? error.message : "Failed to save entry. Please try again.")
     }
   }
+
+  const isLoading = createEntry.isPending || createTechnique.isPending
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -130,15 +120,20 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
 
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-slate-200">
-              Training Notes
+              Training Notes (Markdown supported)
             </Label>
-            <Textarea
-              id="notes"
-              placeholder="How was today's training? What did you learn?"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 min-h-[100px]"
-            />
+            <div data-color-mode="dark" className="w-full">
+              <MDEditor
+                value={notes}
+                onChange={(val) => setNotes(val || "")}
+                preview="edit"
+                height={300}
+                textareaProps={{
+                  placeholder: "How was today's training? What did you learn?",
+                }}
+                className="bg-slate-800/50 border-slate-700"
+              />
+            </div>
           </div>
 
           <div className="space-y-4">

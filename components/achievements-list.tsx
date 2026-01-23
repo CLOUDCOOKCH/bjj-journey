@@ -5,7 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Plus, Trophy, AwardIcon, Trash2 } from "lucide-react"
 import { AddAchievementDialog } from "@/components/add-achievement-dialog"
-import { useRouter } from "next/navigation"
+import { useDeleteAchievement, achievementKeys } from "@/lib/hooks"
+import { useQueryClient } from "@tanstack/react-query"
+import { formatDateString } from "@/lib/utils/date"
 
 interface Achievement {
   id: string
@@ -22,30 +24,22 @@ interface AchievementsListProps {
 
 export function AchievementsList({ achievements, userId }: AchievementsListProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const router = useRouter()
+
+  const queryClient = useQueryClient()
+  const deleteAchievement = useDeleteAchievement({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: achievementKeys.lists() })
+    },
+  })
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this achievement?")) return
 
-    setDeletingId(id)
-
     try {
-      const res = await fetch(`/api/achievements/${id}`, {
-        method: "DELETE",
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || "Failed to delete achievement")
-      }
-
-      router.refresh()
+      await deleteAchievement.mutateAsync(id)
     } catch (error) {
       console.error("Error deleting achievement:", error)
-      alert("Failed to delete achievement. Please try again.")
-    } finally {
-      setDeletingId(null)
+      alert(error instanceof Error ? error.message : "Failed to delete achievement. Please try again.")
     }
   }
 
@@ -105,7 +99,7 @@ export function AchievementsList({ achievements, userId }: AchievementsListProps
                           <div className="flex-1">
                             <h4 className="text-lg font-semibold text-white">{achievement.title}</h4>
                             <p className="text-sm text-slate-300 mt-1">
-                              {new Date(achievement.achievedDate).toLocaleDateString("en-US", {
+                              {formatDateString(achievement.achievedDate, {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
@@ -119,7 +113,7 @@ export function AchievementsList({ achievements, userId }: AchievementsListProps
                             onClick={() => handleDelete(achievement.id)}
                             size="icon"
                             variant="ghost"
-                            disabled={deletingId === achievement.id}
+                            disabled={deleteAchievement.isPending}
                             className="text-red-400 hover:text-red-300 hover:bg-red-950/30"
                           >
                             <Trash2 className="h-4 w-4" />

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1769146434206" clover="3.2.0">
+  <project timestamp="1769146434206" name="All files">
+    <metrics statements="57" coveredstatements="56" conditionals="27" coveredconditionals="26" methods="13" coveredmethods="13" elements="97" coveredelements="95" complexity="0" loc="57" ncloc="57" packages="3" files="4" classes="4"/>
+    <package name="lib">
+      <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="utils.ts" path="/Users/dennisrongo/Documents/GitHub/jiu-jitsu-tracker/lib/utils.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="4" count="21" type="stmt"/>
+        <line num="5" count="21" type="stmt"/>
+      </file>
+    </package>
+    <package name="lib.api">
+      <metrics statements="35" coveredstatements="34" conditionals="21" coveredconditionals="20" methods="7" coveredmethods="7"/>
+      <file name="client.ts" path="/Users/dennisrongo/Documents/GitHub/jiu-jitsu-tracker/lib/api/client.ts">
+        <metrics statements="19" coveredstatements="19" conditionals="13" coveredconditionals="12" methods="5" coveredmethods="5"/>
+        <line num="26" count="29" type="stmt"/>
+        <line num="34" count="29" type="cond" truecount="4" falsecount="0"/>
+        <line num="35" count="16" type="stmt"/>
+        <line num="38" count="29" type="stmt"/>
+        <line num="41" count="27" type="cond" truecount="2" falsecount="0"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="45" count="26" type="stmt"/>
+        <line num="47" count="26" type="cond" truecount="2" falsecount="0"/>
+        <line num="48" count="9" type="cond" truecount="4" falsecount="0"/>
+        <line num="51" count="9" type="stmt"/>
+        <line num="54" count="17" type="stmt"/>
+        <line num="60" count="7" type="stmt"/>
+        <line num="61" count="7" type="stmt"/>
+        <line num="67" count="9" type="stmt"/>
+        <line num="68" count="9" type="stmt"/>
+        <line num="74" count="7" type="stmt"/>
+        <line num="75" count="7" type="stmt"/>
+        <line num="81" count="6" type="stmt"/>
+        <line num="82" count="6" type="stmt"/>
+      </file>
+      <file name="errors.ts" path="/Users/dennisrongo/Documents/GitHub/jiu-jitsu-tracker/lib/api/errors.ts">
+        <metrics statements="16" coveredstatements="15" conditionals="8" coveredconditionals="8" methods="2" coveredmethods="2"/>
+        <line num="1" count="19" type="stmt"/>
+        <line num="6" count="18" type="stmt"/>
+        <line num="7" count="18" type="stmt"/>
+        <line num="11" count="20" type="stmt"/>
+        <line num="12" count="20" type="stmt"/>
+        <line num="14" count="20" type="cond" truecount="2" falsecount="0"/>
+        <line num="15" count="9" type="stmt"/>
+        <line num="21" count="11" type="cond" truecount="2" falsecount="0"/>
+        <line num="23" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="25" count="3" type="stmt"/>
+        <line num="26" count="3" type="stmt"/>
+        <line num="27" count="3" type="stmt"/>
+        <line num="28" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="29" count="3" type="stmt"/>
+        <line num="34" count="0" type="stmt"/>
+        <line num="42" count="8" type="stmt"/>
+      </file>
+    </package>
+    <package name="lib.validations">
+      <metrics statements="18" coveredstatements="18" conditionals="6" coveredconditionals="6" methods="5" coveredmethods="5"/>
+      <file name="schema.ts" path="/Users/dennisrongo/Documents/GitHub/jiu-jitsu-tracker/lib/validations/schema.ts">
+        <metrics statements="18" coveredstatements="18" conditionals="6" coveredconditionals="6" methods="5" coveredmethods="5"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="7" count="5" type="stmt"/>
+        <line num="12" count="4" type="stmt"/>
+        <line num="15" count="3" type="stmt"/>
+        <line num="24" count="12" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="35" count="9" type="stmt"/>
+        <line num="39" count="9" type="stmt"/>
+        <line num="40" count="9" type="stmt"/>
+        <line num="41" count="9" type="cond" truecount="3" falsecount="0"/>
+        <line num="50" count="1" type="stmt"/>
+        <line num="58" count="9" type="stmt"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="75" count="11" type="stmt"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="84" count="11" type="stmt"/>
+        <line num="85" count="11" type="stmt"/>
+        <line num="86" count="11" type="cond" truecount="3" falsecount="0"/>
+      </file>
+    </package>
+  </project>
+</coverage>

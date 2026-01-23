@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import '@uiw/react-md-editor/markdown-editor.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,4 +123,82 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.markdown-content {
+  @apply text-slate-300;
+}
+
+.markdown-content h1 {
+  @apply text-2xl font-bold text-white mb-4 mt-6;
+}
+
+.markdown-content h2 {
+  @apply text-xl font-bold text-white mb-3 mt-5;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-semibold text-white mb-2 mt-4;
+}
+
+.markdown-content p {
+  @apply mb-3 leading-relaxed;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  @apply mb-3 ml-6;
+}
+
+.markdown-content ul {
+  @apply list-disc;
+}
+
+.markdown-content ol {
+  @apply list-decimal;
+}
+
+.markdown-content li {
+  @apply mb-1;
+}
+
+.markdown-content code {
+  @apply bg-slate-800 text-blue-400 px-1 py-0.5 rounded text-sm;
+}
+
+.markdown-content pre {
+  @apply bg-slate-800 p-4 rounded-lg mb-4 overflow-x-auto;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0 text-slate-300;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic text-slate-400 mb-4;
+}
+
+.markdown-content a {
+  @apply text-blue-400 hover:text-blue-300 underline;
+}
+
+.markdown-content strong {
+  @apply font-bold text-white;
+}
+
+.markdown-content hr {
+  @apply border-slate-700 my-6;
+}
+
+.markdown-content table {
+  @apply w-full mb-4 border-collapse;
+}
+
+.markdown-content th,
+.markdown-content td {
+  @apply border border-slate-700 p-2 text-left;
+}
+
+.markdown-content th {
+  @apply bg-slate-800 font-semibold;
 }

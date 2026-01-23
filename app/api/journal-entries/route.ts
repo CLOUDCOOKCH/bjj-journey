@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
     const body = await request.json()
+    console.log('Received journal entry request:', JSON.stringify(body))
+
     const data = journalEntrySchema.parse(body)
 
     const entry = await db.insert(journalEntries).values({

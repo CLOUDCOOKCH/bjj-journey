@@ -4,16 +4,17 @@ import { Card } from "@/components/ui/card"
 import { Calendar, Youtube } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { formatDateString } from "@/lib/utils/date"
 
 interface Technique {
   id: string
   name: string
-  youtube_url: string | null
+  youtubeUrl: string | null
 }
 
 interface RecentEntry {
   id: string
-  entry_date: string
+  entryDate: string
   notes: string | null
   techniques: Technique[]
 }
@@ -45,7 +46,7 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
                 <div className="flex items-center gap-2 text-slate-300">
                   <Calendar className="h-4 w-4 text-blue-400" />
                   <span className="text-sm font-medium">
-                    {new Date(entry.entry_date).toLocaleDateString("en-US", {
+                    {formatDateString(entry.entryDate, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -61,7 +62,7 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
                   <p className="text-xs text-slate-500 font-semibold uppercase">Techniques:</p>
                   {entry.techniques.map((technique) => (
                     <div key={technique.id} className="flex items-center gap-2">
-                      {technique.youtube_url && <Youtube className="h-3 w-3 text-red-400" />}
+                      {technique.youtubeUrl && <Youtube className="h-3 w-3 text-red-400" />}
                       <span className="text-sm text-slate-300">{technique.name}</span>
                     </div>
                   ))}

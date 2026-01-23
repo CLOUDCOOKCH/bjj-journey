@@ -1,58 +1,54 @@
+"use client"
+
 import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { cookies } from "next/headers"
+import { useSession } from "next-auth/react"
 import { AppNav } from "@/components/app-nav"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentEntries } from "@/components/recent-entries"
 import { MonthlyChart } from "@/components/monthly-chart"
 import { QuickEntryButton } from "@/components/quick-entry-button"
+import { useProfile, useJournalEntries, useAchievements } from "@/lib/hooks"
+import { isDateOnOrAfter, isDateBetween, compareDates, formatDateToYYYYMMDD } from "@/lib/utils/date"
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+export default function DashboardPage() {
+  const { data: session, status } = useSession()
+
+  // Always call hooks at the top level (Rules of Hooks)
+  const userId = session?.user?.id
+  const { data: profile, isLoading: profileLoading } = useProfile()
+  const { data: entries = [], isLoading: entriesLoading } = useJournalEntries()
+  const { data: achievements = [], isLoading: achievementsLoading } = useAchievements()
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <AppNav />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <p className="text-slate-400">Loading...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!userId) {
     redirect("/auth/login")
   }
 
-  const userId = session.user.id
-
-  // Get cookies to pass to API routes
-  const cookieStore = await cookies()
-  const cookieHeader = Array.from(cookieStore.getAll())
-    .map(cookie => `${cookie.name}=${cookie.value}`)
-    .join('; ')
-
-  // Fetch data from API routes
-  const [profileRes, entriesRes, achievementsRes] = await Promise.all([
-    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/profiles`, {
-      cache: 'no-store',
-      headers: {
-        cookie: cookieHeader,
-      },
-    }),
-    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/journal-entries`, {
-      cache: 'no-store',
-      headers: {
-        cookie: cookieHeader,
-      },
-    }),
-    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/achievements`, {
-      cache: 'no-store',
-      headers: {
-        cookie: cookieHeader,
-      },
-    }),
-  ])
-
-  if (!profileRes.ok || !entriesRes.ok || !achievementsRes.ok) {
-    throw new Error('Failed to fetch data')
+  // Show loading state while fetching
+  if (profileLoading || entriesLoading || achievementsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <AppNav />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <p className="text-slate-400">Loading...</p>
+          </div>
+        </main>
+      </div>
+    )
   }
-
-  const [profile, entries, achievements] = await Promise.all([
-    profileRes.json(),
-    entriesRes.json(),
-    achievementsRes.json(),
-  ])
 
   // Get recent entries (limit 5)
   const recentEntries = entries.slice(0, 5)
@@ -63,7 +59,7 @@ export default async function DashboardPage() {
   // Current month sessions
   const now = new Date()
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const currentMonthSessions = entries?.filter((e: any) => new Date(e.entryDate) >= currentMonthStart).length || 0
+  const currentMonthSessions = entries?.filter((e) => isDateOnOrAfter(e.entryDate, currentMonthStart)).length || 0
 
   // Last 6 months data for chart
   const monthlyData = []
@@ -73,9 +69,8 @@ export default async function DashboardPage() {
     const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
     const count =
-      entries?.filter((e: any) => {
-        const entryDate = new Date(e.entryDate)
-        return entryDate >= monthStart && entryDate <= monthEnd
+      entries?.filter((e) => {
+        return isDateBetween(e.entryDate, monthStart, monthEnd)
       }).length || 0
 
     monthlyData.push({
@@ -87,23 +82,16 @@ export default async function DashboardPage() {
   // Calculate streak
   let currentStreak = 0
   if (entries && entries.length > 0) {
-    const sortedEntries = [...entries].sort(
-      (a: any, b: any) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime(),
-    )
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const sortedEntries = [...entries].sort((a, b) => b.entryDate.localeCompare(a.entryDate))
+    const todayStr = formatDateToYYYYMMDD(new Date())
 
-    let checkDate = new Date(today)
+    let checkDate = new Date(todayStr)
+
     for (const entry of sortedEntries) {
-      const entryDate = new Date(entry.entryDate)
-      entryDate.setHours(0, 0, 0, 0)
+      const diffDays = compareDates(todayStr, entry.entryDate)
 
-      const diffDays = Math.floor((checkDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24))
-
-      if (diffDays <= 1) {
+      if (diffDays <= currentStreak) {
         currentStreak++
-        checkDate = new Date(entryDate)
-        checkDate.setDate(checkDate.getDate() - 1)
       } else {
         break
       }

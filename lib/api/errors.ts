@@ -21,10 +21,21 @@ export function handleApiError(error: unknown) {
   if (error instanceof Error) {
     // Zod validation errors
     if (error.name === 'ZodError') {
-      return Response.json(
-        { error: 'Invalid request data', details: error.message },
-        { status: 400 }
-      )
+      // Parse Zod error to get the actual validation messages
+      try {
+        const zodError = JSON.parse(error.message)
+        const firstError = zodError.issues?.[0]
+        const errorMessage = firstError?.message || 'Invalid request data'
+        return Response.json(
+          { error: errorMessage },
+          { status: 400 }
+        )
+      } catch {
+        return Response.json(
+          { error: 'Invalid request data' },
+          { status: 400 }
+        )
+      }
     }
   }
 

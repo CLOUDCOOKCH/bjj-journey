@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
+import { useCreateAchievement, achievementKeys } from "@/lib/hooks"
+import { getTodayAsYYYYMMDD } from "@/lib/utils/date"
 
 interface AddAchievementDialogProps {
   isOpen: boolean
@@ -18,9 +20,14 @@ export function AddAchievementDialog({ isOpen, onClose, userId }: AddAchievement
   const [type, setType] = useState<"belt" | "stripe">("stripe")
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [achievedDate, setAchievedDate] = useState(new Date().toISOString().split("T")[0])
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [achievedDate, setAchievedDate] = useState(getTodayAsYYYYMMDD())
+
+  const queryClient = useQueryClient()
+  const createAchievement = useCreateAchievement({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: achievementKeys.lists() })
+    },
+  })
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -28,38 +35,26 @@ export function AddAchievementDialog({ isOpen, onClose, userId }: AddAchievement
       return
     }
 
-    setIsLoading(true)
-
     try {
-      const res = await fetch("/api/achievements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type,
-          title: title.trim(),
-          description: description.trim() || null,
-          achievedDate: achievedDate,
-        }),
+      await createAchievement.mutateAsync({
+        type,
+        title: title.trim(),
+        description: description.trim() || null,
+        achievedDate: achievedDate,
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || "Failed to add achievement")
-      }
-
-      router.refresh()
       onClose()
       setTitle("")
       setDescription("")
-      setAchievedDate(new Date().toISOString().split("T")[0])
+      setAchievedDate(getTodayAsYYYYMMDD())
       setType("stripe")
     } catch (error) {
       console.error("Error adding achievement:", error)
-      alert("Failed to add achievement. Please try again.")
-    } finally {
-      setIsLoading(false)
+      alert(error instanceof Error ? error.message : "Failed to add achievement. Please try again.")
     }
   }
+
+  const isLoading = createAchievement.isPending
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
