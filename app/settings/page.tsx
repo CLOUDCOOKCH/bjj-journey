@@ -2,7 +2,8 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { cookies } from "next/headers"
-import { AppNav } from "@/components/app-nav"
+import { SidebarNav } from "@/components/navigation/sidebar-nav"
+import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { BeltSettings } from "@/components/belt-settings"
 import { AchievementsList } from "@/components/achievements-list"
 import { FrequencyGoalSettings } from "@/components/frequency-goal-settings"
@@ -47,18 +48,21 @@ export default async function SettingsPage() {
   ])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <AppNav />
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-4xl font-bold text-white mb-2">Settings</h1>
-          <p className="text-slate-400">Manage your belt rank and track your achievements</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <SidebarNav />
+      <MobileBottomNav />
+      <main className="lg:ml-64 pb-20 lg:pb-8">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
+            <p className="text-muted-foreground">Manage your belt rank and track your achievements</p>
+          </div>
 
-        <div className="space-y-6">
-          <BeltSettings currentBelt={profile?.belt || "white"} userId={userId} />
-          <FrequencyGoalSettings currentGoal={profile?.monthlyGoal || 12} userId={userId} />
-          <AchievementsList achievements={achievements || []} userId={userId} />
+          <div className="space-y-6">
+            <BeltSettings currentBelt={profile?.belt || "white"} userId={userId} />
+            <FrequencyGoalSettings currentGoal={profile?.monthlyGoal || 12} userId={userId} />
+            <AchievementsList achievements={achievements || []} userId={userId} />
+          </div>
         </div>
       </main>
     </div>

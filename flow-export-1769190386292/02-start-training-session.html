@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jiu Jitsu Journal | Start Training Session</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="view-transition" content="same-origin">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/d40c1968-f8c4-4297-8abe-88fcc983068f" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/d35d8646-97f3-4d3a-87f9-db9550c8fffa" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/87889190-2349-4bb0-a5b5-492148bbc635" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/3244d051-fc91-4a28-afe3-a024d4815bbe" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/aa69524e-17ea-4ff9-b03f-db2c8bd7ea88" as="document">
+    <link rel="prefetch" href="https://p.superdesign.dev/draft/fa35f4c1-dbe4-4812-9960-029ecef13dff" as="document">
+    <style>
+        :root {
+            --background: #020617;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --accent: #2dd4bf;
+        }
+        
+        html { background-color: var(--background); }
+        @view-transition { navigation: auto; }
+        ::view-transition { background-color: var(--background); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: #f1f5f9;
+        }
+
+        .heading-font {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link.active {
+            color: var(--accent);
+            background: rgba(45, 212, 191, 0.05);
+        }
+
+        .animate-reveal {
+            animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes reveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+
+        /* View Transition Definitions */
+        ::view-transition-old(sidebar), ::view-transition-new(sidebar),
+        ::view-transition-old(header), ::view-transition-new(header),
+        ::view-transition-old(brand-logo), ::view-transition-new(brand-logo),
+        ::view-transition-old(user-badge), ::view-transition-new(user-badge) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        ::view-transition-old(main-content) { animation: 0.2s ease-out both fade-out; }
+        ::view-transition-new(main-content) { animation: 0.3s ease-in 0.1s both fade-in; }
+
+        @keyframes fade-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.98); } }
+        @keyframes fade-in { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 1px var(--accent);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    </style>
+</head>
+<body>
+    <div class="flex min-h-screen bg-slate-950 text-slate-200">
+        
+        <!-- Left Sidebar (Persistent) -->
+        <aside style="view-transition-name: sidebar" class="fixed left-0 top-0 hidden lg:flex h-full w-64 flex-col border-r border-slate-800/60 bg-slate-950/50 backdrop-blur-xl z-50">
+            <div class="p-8" style="view-transition-name: brand-logo">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_-3px_rgba(45,212,191,0.4)]">
+                        <iconify-icon icon="lucide:shield" class="text-white text-xl"></iconify-icon>
+                    </div>
+                    <span class="heading-font text-lg font-bold tracking-tight text-slate-100">JJ JOURNAL</span>
+                </div>
+            </div>
+
+            <nav class="mt-4 flex-1 space-y-2 px-4">
+                <a id="nav-dashboard" href="https://p.superdesign.dev/draft/d40c1968-f8c4-4297-8abe-88fcc983068f" class="nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all group">
+                    <iconify-icon icon="lucide:layout-dashboard" class="text-xl transition-colors group-hover:text-teal-400"></iconify-icon>
+                    Dashboard
+                </a>
+                <a id="nav-calendar" href="https://p.superdesign.dev/draft/3244d051-fc91-4a28-afe3-a024d4815bbe" class="nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all group">
+                    <iconify-icon icon="lucide:calendar" class="text-xl transition-colors group-hover:text-teal-400"></iconify-icon>
+                    Calendar
+                </a>
+                <a id="nav-journal" href="#journal" class="nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all group">
+                    <iconify-icon icon="lucide:book-open" class="text-xl transition-colors group-hover:text-teal-400"></iconify-icon>
+                    Journal
+                </a>
+                <a id="nav-techniques" href="https://p.superdesign.dev/draft/aa69524e-17ea-4ff9-b03f-db2c8bd7ea88" class="nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all group">
+                    <iconify-icon icon="lucide:video" class="text-xl transition-colors group-hover:text-teal-400"></iconify-icon>
+                    Techniques
+                </a>
+                <a id="nav-achievements" href="https://p.superdesign.dev/draft/fa35f4c1-dbe4-4812-9960-029ecef13dff" class="nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all group">
+                    <iconify-icon icon="lucide:award" class="text-xl transition-colors group-hover:text-teal-400"></iconify-icon>
+                    Achievements
+                </a>
+                <a id="nav-goals" href="#goals" class="nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all group">
+                    <iconify-icon icon="lucide:target" class="text-xl transition-colors group-hover:text-teal-400"></iconify-icon>
+                    Goals
+                </a>
+            </nav>
+
+            <div class="p-6" style="view-transition-name: user-badge">
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=BJJPlayer" alt="Profile" class="w-10 h-10 rounded-full border border-teal-500/20 bg-slate-800">
+                    <div class="flex flex-col overflow-hidden">
+                        <span class="text-xs font-semibold text-slate-200 truncate">Marcus Silva</span>
+                        <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Purple Belt</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="flex-1 lg:ml-64">
+            
+            <!-- Header (Persistent) -->
+            <header style="view-transition-name: header" class="sticky top-0 z-40 flex h-20 items-center justify-between px-8 bg-slate-950/80 backdrop-blur-md">
+                <div class="flex items-center gap-4">
+                    <a id="back-to-dash" href="https://p.superdesign.dev/draft/d40c1968-f8c4-4297-8abe-88fcc983068f" class="p-2 text-slate-400 hover:text-teal-400 transition-colors bg-slate-900/50 rounded-lg border border-slate-800">
+                        <iconify-icon icon="lucide:arrow-left" class="text-xl"></iconify-icon>
+                    </a>
+                    <div>
+                        <h1 class="heading-font text-xl font-bold text-slate-100">Start Training Session</h1>
+                        <p class="text-xs text-slate-500 font-medium">Logging session for October 26, 2023</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button id="btn-notifications" class="p-2 text-slate-400 hover:text-teal-400 transition-colors relative">
+                        <iconify-icon icon="lucide:bell" class="text-xl"></iconify-icon>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-teal-500 rounded-full ring-2 ring-slate-950"></span>
+                    </button>
+                    <button id="btn-settings" class="p-2 text-slate-400 hover:text-teal-400 transition-colors">
+                        <iconify-icon icon="lucide:settings" class="text-xl"></iconify-icon>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Page Content -->
+            <div style="view-transition-name: main-content" class="p-8 max-w-5xl mx-auto">
+                
+                <form action="#" class="space-y-8 animate-reveal">
+                    
+                    <!-- Session Identity Section -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-3xl">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 block">Session Title</label>
+                            <input type="text" placeholder="Morning Gi Class..." class="w-full bg-slate-900/50 border border-slate-800 text-slate-100 rounded-xl px-4 py-3 focus:ring-1 transition-all">
+                        </div>
+                        <div class="glass-card p-6 rounded-3xl">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 block">Duration (Minutes)</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" min="30" max="180" step="15" value="90" class="flex-1 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <span class="heading-font font-bold text-teal-400 w-16 text-right">90m</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Session Type Toggle -->
+                    <section class="glass-card p-8 rounded-3xl">
+                        <h2 class="text-sm font-bold text-slate-100 mb-6">Training Style</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="session-type" class="hidden peer" checked>
+                                <div class="flex flex-col items-center justify-center p-4 rounded-2xl border border-slate-800 bg-slate-900/30 group-hover:bg-slate-900/50 peer-checked:border-teal-500/50 peer-checked:bg-teal-500/5 transition-all">
+                                    <iconify-icon icon="lucide:user" class="text-2xl mb-2 text-slate-500 peer-checked:text-teal-400"></iconify-icon>
+                                    <span class="text-xs font-bold">Gi</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="session-type" class="hidden peer">
+                                <div class="flex flex-col items-center justify-center p-4 rounded-2xl border border-slate-800 bg-slate-900/30 group-hover:bg-slate-900/50 peer-checked:border-teal-500/50 peer-checked:bg-teal-500/5 transition-all">
+                                    <iconify-icon icon="lucide:shield-off" class="text-2xl mb-2 text-slate-500 peer-checked:text-teal-400"></iconify-icon>
+                                    <span class="text-xs font-bold">No-Gi</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="session-type" class="hidden peer">
+                                <div class="flex flex-col items-center justify-center p-4 rounded-2xl border border-slate-800 bg-slate-900/30 group-hover:bg-slate-900/50 peer-checked:border-teal-500/50 peer-checked:bg-teal-500/5 transition-all">
+                                    <iconify-icon icon="lucide:target" class="text-2xl mb-2 text-slate-500 peer-checked:text-teal-400"></iconify-icon>
+                                    <span class="text-xs font-bold">Drilling</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="session-type" class="hidden peer">
+                                <div class="flex flex-col items-center justify-center p-4 rounded-2xl border border-slate-800 bg-slate-900/30 group-hover:bg-slate-900/50 peer-checked:border-teal-500/50 peer-checked:bg-teal-500/5 transition-all">
+                                    <iconify-icon icon="lucide:flame" class="text-2xl mb-2 text-slate-500 peer-checked:text-teal-400"></iconify-icon>
+                                    <span class="text-xs font-bold">Open Mat</span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+
+                    <!-- Focus Areas Multi-select -->
+                    <section class="glass-card p-8 rounded-3xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-sm font-bold text-slate-100">Focus Areas</h2>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Select all that apply</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-all">Closed Guard</button>
+                            <button type="button" class="px-4 py-2 rounded-full border border-teal-500/30 text-xs font-bold bg-teal-500/10 text-teal-400 transition-all">Butterfly Guard</button>
+                            <button type="button" class="px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-all">Passing</button>
+                            <button type="button" class="px-4 py-2 rounded-full border border-teal-500/30 text-xs font-bold bg-teal-500/10 text-teal-400 transition-all">Back Takes</button>
+                            <button type="button" class="px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-all">Leg Locks</button>
+                            <button type="button" class="px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-all">Mount Escapes</button>
+                            <button type="button" class="px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-all">Sub Defense</button>
+                            <button id="add-more-focus" type="button" class="px-3 py-2 rounded-full border border-dashed border-slate-700 text-slate-500 hover:border-teal-500 hover:text-teal-500 transition-all flex items-center">
+                                <iconify-icon icon="lucide:plus" class="text-sm"></iconify-icon>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Intensity & Performance -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-3xl">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-6 block">Intensity Level</label>
+                            <div class="flex justify-between items-end h-16 gap-1">
+                                <div class="w-full bg-slate-800 rounded-t-sm h-[20%] transition-all hover:bg-teal-500/50 cursor-pointer"></div>
+                                <div class="w-full bg-slate-800 rounded-t-sm h-[40%] transition-all hover:bg-teal-500/50 cursor-pointer"></div>
+                                <div class="w-full bg-slate-800 rounded-t-sm h-[60%] transition-all hover:bg-teal-500/50 cursor-pointer"></div>
+                                <div class="w-full bg-teal-500 rounded-t-sm h-[80%] transition-all shadow-[0_-5px_15px_rgba(45,212,191,0.2)]"></div>
+                                <div class="w-full bg-slate-800 rounded-t-sm h-[100%] transition-all hover:bg-teal-500/50 cursor-pointer"></div>
+                            </div>
+                            <div class="flex justify-between mt-3 px-1">
+                                <span class="text-[10px] font-bold text-slate-600">LIGHT</span>
+                                <span class="text-[10px] font-bold text-teal-400">CHALLENGING</span>
+                                <span class="text-[10px] font-bold text-slate-600">WAR</span>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 rounded-3xl">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 block">Session Notes</label>
+                            <textarea placeholder="How did it feel? Specific details about your rolls..." class="w-full h-24 bg-slate-900/50 border border-slate-800 text-slate-100 rounded-xl px-4 py-3 focus:ring-1 transition-all resize-none text-sm"></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Final Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <a id="submit-session" href="https://p.superdesign.dev/draft/87889190-2349-4bb0-a5b5-492148bbc635" class="flex-1 flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-teal-500/10 active:scale-95">
+                            <iconify-icon icon="lucide:save" class="text-xl"></iconify-icon>
+                            Save Session
+                        </a>
+                        <a id="cancel-session" href="https://p.superdesign.dev/draft/d40c1968-f8c4-4297-8abe-88fcc983068f" class="px-8 py-4 glass-card hover:bg-slate-900 text-slate-400 hover:text-slate-100 font-semibold rounded-2xl text-center transition-all">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+
+            <!-- Mobile Bottom Nav (Persistent) -->
+            <div class="lg:hidden fixed bottom-0 left-0 w-full h-16 bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 flex items-center justify-around px-4 z-50">
+                <a id="mobile-nav-home" href="https://p.superdesign.dev/draft/d40c1968-f8c4-4297-8abe-88fcc983068f" class="text-slate-500 flex flex-col items-center gap-1">
+                    <iconify-icon icon="lucide:layout-dashboard" class="text-xl"></iconify-icon>
+                    <span class="text-[10px] font-bold">Home</span>
+                </a>
+                <a id="mobile-nav-calendar" href="https://p.superdesign.dev/draft/3244d051-fc91-4a28-afe3-a024d4815bbe" class="text-slate-500 flex flex-col items-center gap-1">
+                    <iconify-icon icon="lucide:calendar" class="text-xl"></iconify-icon>
+                    <span class="text-[10px] font-bold">Calendar</span>
+                </a>
+                <div class="-mt-8 w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-500/20 ring-4 ring-slate-950">
+                    <iconify-icon icon="lucide:plus" class="text-slate-950 text-2xl"></iconify-icon>
+                </div>
+                <a id="mobile-nav-journal" href="#journal" class="text-slate-500 flex flex-col items-center gap-1">
+                    <iconify-icon icon="lucide:book-open" class="text-xl"></iconify-icon>
+                    <span class="text-[10px] font-bold">Journal</span>
+                </a>
+                <a id="mobile-nav-profile" href="#profile" class="text-slate-500 flex flex-col items-center gap-1">
+                    <iconify-icon icon="lucide:user" class="text-xl"></iconify-icon>
+                    <span class="text-[10px] font-bold">Profile</span>
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

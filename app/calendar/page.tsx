@@ -1,26 +1,35 @@
 "use client"
 
+import { useState } from "react"
 import { redirect } from "next/navigation"
 import { useSession } from "next-auth/react"
 import CalendarView from "@/components/calendar-view"
-import { AppNav } from "@/components/app-nav"
-import { useJournalEntries } from "@/lib/hooks"
+import { CalendarSidebar } from "@/components/calendar-sidebar"
+import { JournalEntryDialog } from "@/components/journal-entry-dialog"
+import { CalendarHeader } from "@/components/calendar-header"
+import { SidebarNav } from "@/components/navigation/sidebar-nav"
+import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
+import { useJournalEntries, useProfile } from "@/lib/hooks"
 
 export default function CalendarPage() {
   const { data: session, status } = useSession()
+  const [isAddPastDialogOpen, setIsAddPastDialogOpen] = useState(false)
 
-  // Always call hooks at the top level (Rules of Hooks)
   const userId = session?.user?.id
   const isAuthenticated = status === 'authenticated'
-  const { data: entries = [], isLoading } = useJournalEntries(isAuthenticated)
+  const { data: entries = [], isLoading: entriesLoading } = useJournalEntries(isAuthenticated)
+  const { data: profile, isLoading: profileLoading } = useProfile(isAuthenticated)
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <AppNav />
-        <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <p className="text-slate-400">Loading...</p>
+      <div className="min-h-screen bg-background">
+        <SidebarNav />
+        <MobileBottomNav />
+        <main className="lg:ml-64 pb-20 lg:pb-8">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
           </div>
         </main>
       </div>
@@ -31,29 +40,56 @@ export default function CalendarPage() {
     redirect("/auth/login")
   }
 
-  if (isLoading) {
+  if (entriesLoading || profileLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <AppNav />
-        <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <p className="text-slate-400">Loading...</p>
+      <div className="min-h-screen bg-background">
+        <SidebarNav />
+        <MobileBottomNav />
+        <main className="lg:ml-64 pb-20 lg:pb-8">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
           </div>
         </main>
       </div>
     )
   }
 
+  const monthlyGoal = profile?.monthlyGoal || 12
+
+  const handleAddPastSession = () => {
+    setIsAddPastDialogOpen(true)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <AppNav />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-4xl font-bold text-white mb-2">Training Calendar</h1>
-          <p className="text-slate-400">Track your training sessions and review your progress</p>
+    <div className="min-h-screen bg-background">
+      <SidebarNav />
+      <MobileBottomNav />
+      <main className="lg:ml-64 pb-20 lg:pb-8">
+        <CalendarHeader currentDate={new Date()} userName={session?.user?.name?.split(" ")[0]} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-3">
+              <CalendarView entries={entries || []} userId={userId} onAddPastSession={handleAddPastSession} />
+            </div>
+            <div className="lg:col-span-1">
+              <CalendarSidebar 
+                entries={entries || []} 
+                monthlyGoal={monthlyGoal} 
+                onAddPastSession={handleAddPastSession}
+              />
+            </div>
+          </div>
         </div>
-        <CalendarView entries={entries || []} userId={userId} />
       </main>
+      
+      <JournalEntryDialog
+        isOpen={isAddPastDialogOpen}
+        onClose={() => setIsAddPastDialogOpen(false)}
+        selectedDate={new Date()}
+        userId={userId}
+      />
     </div>
   )
 }

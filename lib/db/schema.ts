@@ -64,6 +64,8 @@ export const journalEntries = pgTable('journal_entries', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   entryDate: date('entry_date').notNull(),
+  sessionType: varchar('session_type', { length: 20 }).notNull().default('regular'),
+  durationMinutes: integer('duration_minutes').default(90),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

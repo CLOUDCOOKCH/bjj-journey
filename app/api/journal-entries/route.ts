@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
     const entry = await db.insert(journalEntries).values({
       userId: user.id!,
       entryDate: data.entryDate,
+      sessionType: data.sessionType,
+      durationMinutes: data.durationMinutes,
       notes: data.notes,
     }).returning()
 

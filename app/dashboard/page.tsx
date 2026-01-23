@@ -2,11 +2,14 @@
 
 import { redirect } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { AppNav } from "@/components/app-nav"
+import { SidebarNav } from "@/components/navigation/sidebar-nav"
+import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentEntries } from "@/components/recent-entries"
 import { MonthlyChart } from "@/components/monthly-chart"
-import { QuickEntryButton } from "@/components/quick-entry-button"
+import { QuickActions } from "@/components/quick-actions"
+import { AchievementCard } from "@/components/achievement-card"
 import { useProfile, useJournalEntries, useAchievements } from "@/lib/hooks"
 import { isDateOnOrAfter, isDateBetween, compareDates, formatDateToYYYYMMDD } from "@/lib/utils/date"
 
@@ -15,18 +18,21 @@ export default function DashboardPage() {
 
   // Always call hooks at the top level (Rules of Hooks)
   const userId = session?.user?.id
-  const isAuthenticated = status === 'authenticated'
+  const isAuthenticated = status === "authenticated"
   const { data: profile, isLoading: profileLoading } = useProfile(isAuthenticated)
   const { data: entries = [], isLoading: entriesLoading } = useJournalEntries(isAuthenticated)
   const { data: achievements = [], isLoading: achievementsLoading } = useAchievements(isAuthenticated)
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <AppNav />
-        <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <p className="text-slate-400">Loading...</p>
+      <div className="min-h-screen bg-background">
+        <SidebarNav belt={profile?.belt} />
+        <MobileBottomNav />
+        <main className="lg:ml-64 pb-20 lg:pb-8">
+          <div className="container mx-auto px-4 lg:px-8 py-8">
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
           </div>
         </main>
       </div>
@@ -40,19 +46,22 @@ export default function DashboardPage() {
   // Show loading state while fetching
   if (profileLoading || entriesLoading || achievementsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <AppNav />
-        <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <p className="text-slate-400">Loading...</p>
+      <div className="min-h-screen bg-background">
+        <SidebarNav belt={profile?.belt} />
+        <MobileBottomNav />
+        <main className="lg:ml-64 pb-20 lg:pb-8">
+          <div className="container mx-auto px-4 lg:px-8 py-8">
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
           </div>
         </main>
       </div>
     )
   }
 
-  // Get recent entries (limit 5)
-  const recentEntries = entries.slice(0, 5)
+  // Get recent entries (limit 3)
+  const recentEntries = entries.slice(0, 3)
 
   // Calculate statistics
   const totalSessions = entries?.length || 0
@@ -86,8 +95,6 @@ export default function DashboardPage() {
     const sortedEntries = [...entries].sort((a, b) => b.entryDate.localeCompare(a.entryDate))
     const todayStr = formatDateToYYYYMMDD(new Date())
 
-    let checkDate = new Date(todayStr)
-
     for (const entry of sortedEntries) {
       const diffDays = compareDates(todayStr, entry.entryDate)
 
@@ -99,30 +106,75 @@ export default function DashboardPage() {
     }
   }
 
+  // Calculate next achievement
+  const getNextAchievement = () => {
+    if (!achievements || achievements.length === 0) {
+      return {
+        title: "First Training Session",
+        description: "Complete your first training session to start tracking your journey.",
+        sessionsRemaining: 1,
+      }
+    }
+
+    // Simple logic: next milestone at session milestones
+    const milestones = [10, 25, 50, 100, 150, 200, 500]
+    const nextMilestone = milestones.find((m) => m > totalSessions)
+
+    if (nextMilestone) {
+      return {
+        title: `${nextMilestone} Training Sessions`,
+        description: `You are ${nextMilestone - totalSessions} sessions away from this milestone.`,
+        sessionsRemaining: nextMilestone - totalSessions,
+      }
+    }
+
+    return {
+      title: "Jiu-Jitsu Journey",
+      description: "Continue your training and unlock new achievements.",
+      sessionsRemaining: 0,
+    }
+  }
+
+  const nextAchievement = getNextAchievement()
+
   return (
     <div className="min-h-screen bg-background">
-      <AppNav />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back! Here&apos;s your training overview</p>
+      <SidebarNav belt={profile?.belt} />
+      <MobileBottomNav />
+
+      <main className="lg:ml-64 pb-20 lg:pb-8">
+        <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">
+          {/* Header */}
+          <DashboardHeader userName={session?.user?.name?.split(" ")[0]} />
+
+          {/* Stats Grid - 3 Cards */}
+          <DashboardStats
+            totalSessions={totalSessions}
+            currentMonthSessions={currentMonthSessions}
+            currentStreak={currentStreak}
+            monthlyGoal={profile?.monthlyGoal || 12}
+          />
+
+          {/* Two-Column Layout */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column (2/3 width) */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Quick Actions */}
+              <QuickActions />
+
+              {/* Recent Activity */}
+              <RecentEntries entries={recentEntries || []} />
+            </div>
+
+            {/* Right Column (1/3 width) */}
+            <div className="space-y-8">
+              {/* Training Volume Chart */}
+              <MonthlyChart data={monthlyData} />
+
+              {/* Achievement Card */}
+              <AchievementCard nextAchievement={nextAchievement} />
+            </div>
           </div>
-          <QuickEntryButton userId={userId} />
-        </div>
-
-        <DashboardStats
-          totalSessions={totalSessions}
-          currentMonthSessions={currentMonthSessions}
-          currentStreak={currentStreak}
-          belt={profile?.belt || "white"}
-          achievementsCount={achievements?.length || 0}
-          monthlyGoal={profile?.monthlyGoal || 12}
-        />
-
-        <div className="grid lg:grid-cols-2 gap-6 mt-6">
-          <MonthlyChart data={monthlyData} />
-          <RecentEntries entries={recentEntries || []} />
         </div>
       </main>
     </div>

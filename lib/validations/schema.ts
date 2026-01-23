@@ -44,10 +44,14 @@ export const journalEntrySchema = z.object({
     }, {
       message: 'Invalid date (e.g., February 30 is not valid)',
     }),
+  sessionType: z.enum(['regular', 'competition', 'open_mat']).default('regular'),
+  durationMinutes: z.number().int().min(15).max(480).default(90),
   notes: z.string().nullable().optional(),
 })
 
 export const journalEntryUpdateSchema = z.object({
+  sessionType: z.enum(['regular', 'competition', 'open_mat']).optional(),
+  durationMinutes: z.number().int().min(15).max(480).optional(),
   notes: z.string().nullable().optional(),
 })
 

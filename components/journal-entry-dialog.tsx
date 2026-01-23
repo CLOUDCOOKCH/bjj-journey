@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, X, Youtube, Trash2 } from "lucide-react"
+import { Plus, X, Youtube, Trash2, Clock } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   useCreateJournalEntry,
@@ -16,6 +16,8 @@ import {
   useCreateTechnique,
   journalEntryKeys,
 } from "@/lib/hooks"
+import { getSessionTypeLabel, getSessionTypeBadgeColor } from "@/lib/utils/calendar-stats"
+import { JournalEntry as DbJournalEntry } from "@/lib/db/schema"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -29,11 +31,8 @@ interface Technique {
   notes: string
 }
 
-interface JournalEntry {
-  id: string
-  entryDate: string
-  notes: string | null
-  techniques: Technique[]
+interface JournalEntryWithTechniques extends DbJournalEntry {
+  techniques?: Technique[]
 }
 
 interface JournalEntryDialogProps {
@@ -41,11 +40,13 @@ interface JournalEntryDialogProps {
   onClose: () => void
   selectedDate: Date | null
   userId: string
-  existingEntry?: JournalEntry
+  existingEntry?: JournalEntryWithTechniques
 }
 
 export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, existingEntry }: JournalEntryDialogProps) {
   const [notes, setNotes] = useState("")
+  const [sessionType, setSessionType] = useState<"regular" | "competition" | "open_mat">("regular")
+  const [durationMinutes, setDurationMinutes] = useState(90)
   const [techniques, setTechniques] = useState<Technique[]>([])
 
   const queryClient = useQueryClient()
@@ -69,9 +70,13 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
   useEffect(() => {
     if (existingEntry) {
       setNotes(existingEntry.notes || "")
+      setSessionType((existingEntry.sessionType || "regular") as "regular" | "competition" | "open_mat")
+      setDurationMinutes(existingEntry.durationMinutes || 90)
       setTechniques(existingEntry.techniques || [])
     } else {
       setNotes("")
+      setSessionType("regular")
+      setDurationMinutes(90)
       setTechniques([])
     }
   }, [existingEntry, isOpen])
@@ -99,7 +104,11 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
         console.log('Updating entry with ID:', existingEntry.id)
         await updateEntry.mutateAsync({
           id: existingEntry.id,
-          data: { notes: notes || null },
+          data: { 
+            sessionType,
+            durationMinutes,
+            notes: notes || null 
+          },
         })
 
         // Create new techniques
@@ -127,6 +136,8 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
 
         const entryData = await createEntry.mutateAsync({
           entryDate: dateStr,
+          sessionType,
+          durationMinutes,
           notes: notes || null,
         })
 
@@ -179,6 +190,50 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="sessionType" className="text-foreground font-medium">
+                Session Type
+              </Label>
+              <div className="grid grid-cols-3 gap-3">
+                {(['regular', 'competition', 'open_mat'] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setSessionType(type)}
+                    className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-semibold ${
+                      sessionType === type
+                        ? `${getSessionTypeBadgeColor(type).bg} ${getSessionTypeBadgeColor(type).text} border-current`
+                        : 'border-slate-700 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                    }`}
+                  >
+                    {getSessionTypeLabel(type)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="duration" className="text-foreground font-medium">
+                Duration (minutes)
+              </Label>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="duration"
+                  type="number"
+                  min="15"
+                  max="480"
+                  step="15"
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 90)}
+                  className="bg-background/50 border-input text-foreground focus-visible:ring-primary/30"
+                />
+                <span className="text-sm text-muted-foreground">minutes</span>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-foreground font-medium">
               Training Notes (Markdown supported)

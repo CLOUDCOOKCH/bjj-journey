@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, X, Youtube } from "lucide-react"
+import { Plus, X, Youtube, Clock } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCreateJournalEntry, useCreateTechnique, journalEntryKeys } from "@/lib/hooks"
 import { getTodayAsYYYYMMDD } from "@/lib/utils/date"
+import { getSessionTypeLabel, getSessionTypeBadgeColor } from "@/lib/utils/calendar-stats"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -32,6 +33,8 @@ interface QuickEntryDialogProps {
 export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogProps) {
   const [entryDate, setEntryDate] = useState(getTodayAsYYYYMMDD())
   const [notes, setNotes] = useState("")
+  const [sessionType, setSessionType] = useState<"regular" | "competition" | "open_mat">("regular")
+  const [durationMinutes, setDurationMinutes] = useState(90)
   const [techniques, setTechniques] = useState<Technique[]>([])
 
   const queryClient = useQueryClient()
@@ -45,6 +48,8 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
   const resetForm = () => {
     setEntryDate(getTodayAsYYYYMMDD())
     setNotes("")
+    setSessionType("regular")
+    setDurationMinutes(90)
     setTechniques([])
   }
 
@@ -68,6 +73,8 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
       // Create new entry
       const entryData = await createEntry.mutateAsync({
         entryDate,
+        sessionType,
+        durationMinutes,
         notes: notes || null,
       })
 
@@ -116,6 +123,50 @@ export function QuickEntryDialog({ isOpen, onClose, userId }: QuickEntryDialogPr
               onChange={(e) => setEntryDate(e.target.value)}
               className="bg-slate-800/50 border-slate-700 text-white"
             />
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="sessionType" className="text-slate-200">
+                Session Type
+              </Label>
+              <div className="grid grid-cols-3 gap-3">
+                {(['regular', 'competition', 'open_mat'] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setSessionType(type)}
+                    className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-semibold ${
+                      sessionType === type
+                        ? `${getSessionTypeBadgeColor(type).bg} ${getSessionTypeBadgeColor(type).text} border-current`
+                        : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                    }`}
+                  >
+                    {getSessionTypeLabel(type)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="duration" className="text-slate-200">
+                Duration (minutes)
+              </Label>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-slate-400" />
+                <Input
+                  id="duration"
+                  type="number"
+                  min="15"
+                  max="480"
+                  step="15"
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 90)}
+                  className="bg-slate-800/50 border-slate-700 text-white"
+                />
+                <span className="text-sm text-slate-400">minutes</span>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
