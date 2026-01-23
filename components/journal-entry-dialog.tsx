@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, X, Youtube, Trash2, Clock } from "lucide-react"
+import { Plus, X, Youtube, Trash2 } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   useCreateJournalEntry,
@@ -16,8 +16,11 @@ import {
   useCreateTechnique,
   journalEntryKeys,
 } from "@/lib/hooks"
-import { getSessionTypeLabel, getSessionTypeBadgeColor } from "@/lib/utils/calendar-stats"
+
 import { JournalEntry as DbJournalEntry } from "@/lib/db/schema"
+import { TrainingStyleSelector, TrainingStyle } from "@/components/start-training/training-style-selector"
+import { FocusAreaTags } from "@/components/start-training/focus-area-tags"
+import { IntensityLevelBar } from "@/components/start-training/intensity-level-bar"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -44,9 +47,12 @@ interface JournalEntryDialogProps {
 }
 
 export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, existingEntry }: JournalEntryDialogProps) {
+  const [title, setTitle] = useState("")
   const [notes, setNotes] = useState("")
-  const [sessionType, setSessionType] = useState<"regular" | "competition" | "open_mat">("regular")
+  const [sessionType, setSessionType] = useState<TrainingStyle>("gi")
   const [durationMinutes, setDurationMinutes] = useState(90)
+  const [focusAreas, setFocusAreas] = useState<string[]>([])
+  const [intensityLevel, setIntensityLevel] = useState(4)
   const [techniques, setTechniques] = useState<Technique[]>([])
 
   const queryClient = useQueryClient()
@@ -69,14 +75,24 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
 
   useEffect(() => {
     if (existingEntry) {
+      setTitle(existingEntry.title || "")
       setNotes(existingEntry.notes || "")
-      setSessionType((existingEntry.sessionType || "regular") as "regular" | "competition" | "open_mat")
+      const mappedSessionType: TrainingStyle =
+        existingEntry.sessionType === 'regular' ? 'gi' :
+        existingEntry.sessionType === 'competition' ? 'open_mat' :
+        (existingEntry.sessionType as TrainingStyle) || 'gi'
+      setSessionType(mappedSessionType)
       setDurationMinutes(existingEntry.durationMinutes || 90)
+      setFocusAreas(existingEntry.focusAreas?.split(",").filter(Boolean) || [])
+      setIntensityLevel(existingEntry.intensityLevel || 4)
       setTechniques(existingEntry.techniques || [])
     } else {
+      setTitle("")
       setNotes("")
-      setSessionType("regular")
+      setSessionType("gi")
       setDurationMinutes(90)
+      setFocusAreas([])
+      setIntensityLevel(4)
       setTechniques([])
     }
   }, [existingEntry, isOpen])
@@ -104,10 +120,13 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
         console.log('Updating entry with ID:', existingEntry.id)
         await updateEntry.mutateAsync({
           id: existingEntry.id,
-          data: { 
+          data: {
+            title: title || undefined,
             sessionType,
             durationMinutes,
-            notes: notes || null 
+            focusAreas: focusAreas.join(",") || undefined,
+            intensityLevel,
+            notes: notes || undefined,
           },
         })
 
@@ -136,9 +155,12 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
 
         const entryData = await createEntry.mutateAsync({
           entryDate: dateStr,
+          title: title || undefined,
           sessionType,
           durationMinutes,
-          notes: notes || null,
+          focusAreas: focusAreas.join(",") || undefined,
+          intensityLevel,
+          notes: notes || undefined,
         })
 
         // Insert techniques
@@ -192,25 +214,23 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="sessionType" className="text-foreground font-medium">
-                Session Type
+              <Label htmlFor="title" className="text-foreground font-medium">
+                Session Title
               </Label>
-              <div className="grid grid-cols-3 gap-3">
-                {(['regular', 'competition', 'open_mat'] as const).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setSessionType(type)}
-                    className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-semibold ${
-                      sessionType === type
-                        ? `${getSessionTypeBadgeColor(type).bg} ${getSessionTypeBadgeColor(type).text} border-current`
-                        : 'border-slate-700 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
-                    }`}
-                  >
-                    {getSessionTypeLabel(type)}
-                  </button>
-                ))}
-              </div>
+              <Input
+                id="title"
+                placeholder="Morning Gi Class..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sessionType" className="text-foreground font-medium">
+                Training Style
+              </Label>
+              <TrainingStyleSelector value={sessionType} onChange={setSessionType} />
             </div>
 
             <div className="space-y-2">
@@ -218,7 +238,6 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                 Duration (minutes)
               </Label>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
                 <Input
                   id="duration"
                   type="number"
@@ -232,6 +251,28 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
                 <span className="text-sm text-muted-foreground">minutes</span>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-foreground font-medium">Focus Areas</Label>
+            </div>
+            <FocusAreaTags
+              selectedAreas={focusAreas}
+              onToggleArea={(area) => setFocusAreas(prev =>
+                prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
+              )}
+              onAddCustom={(area) => {
+                if (!focusAreas.includes(area)) {
+                  setFocusAreas(prev => [...prev, area])
+                }
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Intensity Level</Label>
+            <IntensityLevelBar value={intensityLevel} onChange={setIntensityLevel} />
           </div>
 
           <div className="space-y-2">

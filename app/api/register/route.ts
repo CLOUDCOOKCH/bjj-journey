@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password } = signUpSchema.parse(body)
+    const { email, password, name } = signUpSchema.parse(body)
 
     // Check if user already exists
     const existingUser = await db.query.users.findFirst({
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     const newUser = await db.insert(users).values({
       email,
       password: hashedPassword,
+      name,
     }).returning()
 
     // Create profile

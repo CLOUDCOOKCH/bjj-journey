@@ -1,6 +1,6 @@
 import { JournalEntry } from '@/lib/db/schema'
 
-export type SessionType = 'regular' | 'competition' | 'open_mat'
+export type SessionType = 'regular' | 'competition' | 'open_mat' | 'gi' | 'no_gi' | 'drilling'
 
 export interface CalendarStats {
   currentStreak: number
@@ -14,6 +14,9 @@ export interface SessionCountByType {
   regular: number
   competition: number
   open_mat: number
+  gi: number
+  no_gi: number
+  drilling: number
 }
 
 export function calculateCurrentStreak(entries: JournalEntry[]): number {
@@ -62,7 +65,7 @@ export function countSessionsByType(entries: JournalEntry[]): SessionCountByType
     const sessionType = entry.sessionType as SessionType
     acc[sessionType]++
     return acc
-  }, { regular: 0, competition: 0, open_mat: 0 })
+  }, { regular: 0, competition: 0, open_mat: 0, gi: 0, no_gi: 0, drilling: 0 })
 }
 
 export function calculateTotalMatTime(entries: JournalEntry[]): string {
@@ -112,6 +115,12 @@ export function getSessionTypeColor(sessionType: SessionType): string {
       return 'bg-purple-500'
     case 'open_mat':
       return 'bg-blue-500'
+    case 'gi':
+      return 'bg-teal-500'
+    case 'no_gi':
+      return 'bg-orange-500'
+    case 'drilling':
+      return 'bg-cyan-500'
     default:
       return 'bg-teal-500'
   }
@@ -125,6 +134,12 @@ export function getSessionTypeLabel(sessionType: SessionType): string {
       return 'Competition'
     case 'open_mat':
       return 'Open Mat'
+    case 'gi':
+      return 'Gi Training'
+    case 'no_gi':
+      return 'No-Gi Training'
+    case 'drilling':
+      return 'Drilling'
     default:
       return 'Regular Training'
   }
@@ -149,6 +164,21 @@ export function getSessionTypeBadgeColor(sessionType: SessionType): {
       return {
         bg: 'bg-blue-500/40',
         text: 'text-blue-400',
+      }
+    case 'gi':
+      return {
+        bg: 'bg-teal-500/40',
+        text: 'text-teal-400',
+      }
+    case 'no_gi':
+      return {
+        bg: 'bg-orange-500/40',
+        text: 'text-orange-400',
+      }
+    case 'drilling':
+      return {
+        bg: 'bg-cyan-500/40',
+        text: 'text-cyan-400',
       }
     default:
       return {

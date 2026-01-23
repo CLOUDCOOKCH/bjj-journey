@@ -1,19 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { redirect } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import CalendarView from "@/components/calendar-view"
 import { CalendarSidebar } from "@/components/calendar-sidebar"
-import { JournalEntryDialog } from "@/components/journal-entry-dialog"
 import { CalendarHeader } from "@/components/calendar-header"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { useJournalEntries, useProfile } from "@/lib/hooks"
 
 export default function CalendarPage() {
+  const router = useRouter()
   const { data: session, status } = useSession()
-  const [isAddPastDialogOpen, setIsAddPastDialogOpen] = useState(false)
 
   const userId = session?.user?.id
   const isAuthenticated = status === 'authenticated'
@@ -59,7 +58,7 @@ export default function CalendarPage() {
   const monthlyGoal = profile?.monthlyGoal || 12
 
   const handleAddPastSession = () => {
-    setIsAddPastDialogOpen(true)
+    router.push("/start-training")
   }
 
   return (
@@ -83,13 +82,6 @@ export default function CalendarPage() {
           </div>
         </div>
       </main>
-      
-      <JournalEntryDialog
-        isOpen={isAddPastDialogOpen}
-        onClose={() => setIsAddPastDialogOpen(false)}
-        selectedDate={new Date()}
-        userId={userId}
-      />
     </div>
   )
 }

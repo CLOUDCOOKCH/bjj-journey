@@ -16,6 +16,7 @@ export {
 // Journal entry hooks
 export {
   useJournalEntries,
+  useInfiniteJournalEntries,
   useJournalEntry,
   useCreateJournalEntry,
   useUpdateJournalEntry,
@@ -39,3 +40,9 @@ export {
   useDeleteAchievement,
   achievementKeys,
 } from './use-achievements'
+
+// Progress hooks
+export {
+  useProgressStats,
+  progressKeys,
+} from './use-progress'

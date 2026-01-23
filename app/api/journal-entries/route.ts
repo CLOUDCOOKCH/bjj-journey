@@ -2,23 +2,58 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api/auth'
 import { db } from '@/lib/db'
 import { journalEntries } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, asc, sql } from 'drizzle-orm'
 import { journalEntrySchema } from '@/lib/validations/schema'
 import { handleApiError } from '@/lib/api/errors'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth()
+    const searchParams = request.nextUrl.searchParams
+
+    const limit = Math.min(Number(searchParams.get('limit') || '20'), 100)
+    const offset = Number(searchParams.get('offset') || '0')
+    const sort = searchParams.get('sort') || 'latest'
+
+    let orderBy
+    switch (sort) {
+      case 'oldest':
+        orderBy = [asc(journalEntries.entryDate)]
+        break
+      case 'duration':
+        orderBy = [desc(journalEntries.durationMinutes), desc(journalEntries.entryDate)]
+        break
+      case 'intensity':
+        orderBy = [desc(journalEntries.intensityLevel), desc(journalEntries.entryDate)]
+        break
+      case 'latest':
+      default:
+        orderBy = [desc(journalEntries.entryDate)]
+        break
+    }
 
     const entries = await db.query.journalEntries.findMany({
       where: eq(journalEntries.userId, user.id!),
       with: {
         techniques: true,
       },
-      orderBy: [desc(journalEntries.entryDate)],
+      orderBy,
+      limit,
+      offset,
     })
 
-    return NextResponse.json(entries)
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(journalEntries)
+      .where(eq(journalEntries.userId, user.id!))
+
+    const hasMore = offset + entries.length < count
+
+    return NextResponse.json({
+      entries,
+      total: count,
+      hasMore,
+    })
   } catch (error) {
     return handleApiError(error)
   }
@@ -36,6 +71,9 @@ export async function POST(request: NextRequest) {
       userId: user.id!,
       entryDate: data.entryDate,
       sessionType: data.sessionType,
+      title: data.title || null,
+      focusAreas: data.focusAreas || null,
+      intensityLevel: data.intensityLevel || null,
       durationMinutes: data.durationMinutes,
       notes: data.notes,
     }).returning()

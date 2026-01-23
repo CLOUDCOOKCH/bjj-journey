@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { JournalEntryDialog } from "@/components/journal-entry-dialog"
 import { formatDateToYYYYMMDD } from "@/lib/utils/date"
 import { getSessionTypeBadgeColor, getSessionTypeLabel } from "@/lib/utils/calendar-stats"
 import { JournalEntry as DbJournalEntry } from "@/lib/db/schema"
@@ -20,9 +20,8 @@ interface CalendarViewProps {
 }
 
 export default function CalendarView({ entries, userId, onAddPastSession }: CalendarViewProps) {
+  const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -45,8 +44,13 @@ export default function CalendarView({ entries, userId, onAddPastSession }: Cale
 
   const handleDateClick = (day: number) => {
     const clickedDate = new Date(year, month, day)
-    setSelectedDate(clickedDate)
-    setIsDialogOpen(true)
+    const entry = getEntryForDate(clickedDate)
+
+    if (entry) {
+      router.push(`/start-training?date=${formatDateToYYYYMMDD(clickedDate)}&entryId=${entry.id}`)
+    } else {
+      router.push(`/start-training?date=${formatDateToYYYYMMDD(clickedDate)}`)
+    }
   }
 
   const getEntryForDate = (date: Date): JournalEntryWithTechniques | undefined => {
@@ -152,17 +156,6 @@ export default function CalendarView({ entries, userId, onAddPastSession }: Cale
           {calendarDays}
         </div>
       </Card>
-
-      <JournalEntryDialog
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false)
-          setSelectedDate(null)
-        }}
-        selectedDate={selectedDate}
-        userId={userId}
-        existingEntry={selectedDate ? getEntryForDate(selectedDate) : undefined}
-      />
     </div>
   )
 }

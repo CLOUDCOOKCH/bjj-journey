@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Calendar, BookOpen, Video, Award, Target, Shield } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { LayoutDashboard, Calendar, BookOpen, Video, Award, Target, Shield, LogOut, Settings } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button"
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -55,18 +56,38 @@ export function SidebarNav({ belt }: SidebarNavProps) {
       </nav>
 
       {/* User Menu */}
-      <div className="p-6">
+      <div className="p-6 space-y-3">
+        <Link href="/settings">
+          <div className="glass-card p-4 rounded-2xl flex items-center gap-3 hover:border-primary/30 cursor-pointer">
+            <Settings className="w-5 h-5 text-muted-foreground" />
+            <div className="flex flex-col overflow-hidden flex-1">
+              <p className="text-xs font-semibold text-foreground">Settings</p>
+              <p className="text-[10px] text-muted-foreground">Preferences & profile</p>
+            </div>
+          </div>
+        </Link>
+
         <div className="glass-card p-4 rounded-2xl flex items-center gap-3">
           <div className="w-10 h-10 rounded-full border border-primary/20 bg-accent flex items-center justify-center text-sm font-bold text-foreground">
             {session?.user?.name?.[0] || "U"}
           </div>
-          <div className="flex flex-col overflow-hidden">
+          <div className="flex flex-col overflow-hidden flex-1">
             <p className="text-xs font-semibold text-foreground truncate">{session?.user?.name || "Athlete"}</p>
             <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
               {belt ? `${belt} Belt` : "White Belt"}
             </p>
           </div>
         </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => signOut({ callbackUrl: "/auth/login" })}
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:border-destructive/30"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
       </div>
     </aside>
   )

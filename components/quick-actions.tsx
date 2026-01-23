@@ -7,7 +7,7 @@ const actions = [
   {
     label: "Start New Session",
     icon: Plus,
-    href: "/calendar?action=new",
+    href: "/start-training",
     variant: "primary" as const,
   },
   {

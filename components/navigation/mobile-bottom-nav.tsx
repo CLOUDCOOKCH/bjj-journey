@@ -30,7 +30,7 @@ export function MobileBottomNav() {
       })}
 
       {/* Center FAB for quick add */}
-      <Link href="/calendar?action=new" className="-mt-8 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all">
+      <Link href="/start-training" className="-mt-8 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all">
         <Plus className="text-foreground text-2xl" />
       </Link>
     </div>

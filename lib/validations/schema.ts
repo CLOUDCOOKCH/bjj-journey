@@ -10,7 +10,7 @@ export const authSchema = z.object({
 })
 
 export const signUpSchema = authSchema.extend({
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -24,7 +24,12 @@ export const signUpSchema = authSchema.extend({
 export const profileUpdateSchema = z.object({
   belt: z.enum(['white', 'blue', 'purple', 'brown', 'black'], {
     errorMap: () => ({ message: 'Invalid belt rank' }),
-  }),
+  }).optional(),
+  stripes: z.number().int().min(0).max(4).optional(),
+  currentBeltDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+    .nullable()
+    .optional(),
   monthlyGoal: z.number().int().min(1).max(31).optional(),
 })
 
@@ -44,13 +49,19 @@ export const journalEntrySchema = z.object({
     }, {
       message: 'Invalid date (e.g., February 30 is not valid)',
     }),
-  sessionType: z.enum(['regular', 'competition', 'open_mat']).default('regular'),
+  sessionType: z.enum(['gi', 'no_gi', 'drilling', 'open_mat', 'regular', 'competition']).default('regular'),
+  title: z.string().max(200, 'Title too long').optional(),
+  focusAreas: z.string().max(500, 'Focus areas too long').optional(),
+  intensityLevel: z.number().int().min(1).max(5).optional(),
   durationMinutes: z.number().int().min(15).max(480).default(90),
   notes: z.string().nullable().optional(),
 })
 
 export const journalEntryUpdateSchema = z.object({
-  sessionType: z.enum(['regular', 'competition', 'open_mat']).optional(),
+  sessionType: z.enum(['gi', 'no_gi', 'drilling', 'open_mat', 'regular', 'competition']).optional(),
+  title: z.string().max(200).optional(),
+  focusAreas: z.string().max(500).optional(),
+  intensityLevel: z.number().int().min(1).max(5).optional(),
   durationMinutes: z.number().int().min(15).max(480).optional(),
   notes: z.string().nullable().optional(),
 })

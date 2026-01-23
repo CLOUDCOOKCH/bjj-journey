@@ -8,16 +8,17 @@ import { handleApiError, ApiError } from '@/lib/api/errors'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth()
     const body = await request.json()
     const data = techniqueUpdateSchema.parse(body)
+    const { id } = await params
 
     // Verify the technique belongs to a journal entry owned by the user
     const technique = await db.query.techniques.findFirst({
-      where: eq(techniques.id, params.id),
+      where: eq(techniques.id, id),
       with: {
         journalEntry: true,
       },
@@ -29,7 +30,7 @@ export async function PUT(
 
     const updated = await db.update(techniques)
       .set(data)
-      .where(eq(techniques.id, params.id))
+      .where(eq(techniques.id, id))
       .returning()
 
     return NextResponse.json(updated[0])
@@ -40,14 +41,15 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth()
+    const { id } = await params
 
     // Verify the technique belongs to a journal entry owned by the user
     const technique = await db.query.techniques.findFirst({
-      where: eq(techniques.id, params.id),
+      where: eq(techniques.id, id),
       with: {
         journalEntry: true,
       },
@@ -57,7 +59,7 @@ export async function DELETE(
       throw new ApiError(403, 'Technique not found or access denied')
     }
 
-    await db.delete(techniques).where(eq(techniques.id, params.id))
+    await db.delete(techniques).where(eq(techniques.id, id))
 
     return NextResponse.json({ success: true })
   } catch (error) {

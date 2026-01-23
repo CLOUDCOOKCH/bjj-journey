@@ -5,7 +5,6 @@ import { cookies } from "next/headers"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { BeltSettings } from "@/components/belt-settings"
-import { AchievementsList } from "@/components/achievements-list"
 import { FrequencyGoalSettings } from "@/components/frequency-goal-settings"
 
 export default async function SettingsPage() {
@@ -23,29 +22,18 @@ export default async function SettingsPage() {
     .join('; ')
 
   // Fetch data from API
-  const [profileRes, achievementsRes] = await Promise.all([
-    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/profiles`, {
-      cache: 'no-store',
-      headers: {
-        cookie: cookieHeader,
-      },
-    }),
-    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/achievements`, {
-      cache: 'no-store',
-      headers: {
-        cookie: cookieHeader,
-      },
-    }),
-  ])
+  const profileRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/profiles`, {
+    cache: 'no-store',
+    headers: {
+      cookie: cookieHeader,
+    },
+  })
 
-  if (!profileRes.ok || !achievementsRes.ok) {
+  if (!profileRes.ok) {
     throw new Error('Failed to fetch data')
   }
 
-  const [profile, achievements] = await Promise.all([
-    profileRes.json(),
-    achievementsRes.json(),
-  ])
+  const profile = await profileRes.json()
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,13 +43,12 @@ export default async function SettingsPage() {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
-            <p className="text-muted-foreground">Manage your belt rank and track your achievements</p>
+            <p className="text-muted-foreground">Manage your belt rank and training goals</p>
           </div>
 
           <div className="space-y-6">
             <BeltSettings currentBelt={profile?.belt || "white"} userId={userId} />
             <FrequencyGoalSettings currentGoal={profile?.monthlyGoal || 12} userId={userId} />
-            <AchievementsList achievements={achievements || []} userId={userId} />
           </div>
         </div>
       </main>

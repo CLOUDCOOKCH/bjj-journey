@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useMutation, useQuery, type UseMutationOptions } from '@tanstack/react-query'
+import { useMutation, useQuery, useInfiniteQuery, type UseMutationOptions } from '@tanstack/react-query'
 import { get, post, patch, del } from '@/lib/api/client'
 import type { JournalEntry } from '@/lib/db/schema'
 import type { JournalEntryInput, JournalEntryUpdateInput } from '@/lib/validations/schema'
@@ -18,6 +18,12 @@ export type JournalEntryWithTechniques = JournalEntry & {
   }>
 }
 
+interface JournalEntriesResponse {
+  entries: JournalEntryWithTechniques[]
+  total: number
+  hasMore: boolean
+}
+
 // ============================================================================
 // Query Keys
 // ============================================================================
@@ -25,6 +31,7 @@ export type JournalEntryWithTechniques = JournalEntry & {
 export const journalEntryKeys = {
   all: ['journal-entries'] as const,
   lists: () => [...journalEntryKeys.all, 'list'] as const,
+  list: (sort: string) => [...journalEntryKeys.all, 'list', sort] as const,
   detail: (id: string) => [...journalEntryKeys.all, 'detail', id] as const,
 }
 
@@ -33,14 +40,43 @@ export const journalEntryKeys = {
 // ============================================================================
 
 /**
- * Fetch all journal entries for the current user
+ * Fetch all journal entries for the current user (legacy, for backwards compatibility)
  */
 export function useJournalEntries(enabled?: boolean) {
   const { status } = useSession()
 
   return useQuery({
     queryKey: journalEntryKeys.lists(),
-    queryFn: () => get<JournalEntryWithTechniques[]>('/api/journal-entries'),
+    queryFn: async () => {
+      const response = await get<JournalEntriesResponse>('/api/journal-entries')
+      return response.entries
+    },
+    enabled: enabled ?? status === 'authenticated',
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  })
+}
+
+/**
+ * Fetch paginated journal entries using infinite scroll
+ */
+export function useInfiniteJournalEntries(sort: string = 'latest', enabled?: boolean) {
+  const { status } = useSession()
+
+  return useInfiniteQuery({
+    queryKey: journalEntryKeys.list(sort),
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await get<JournalEntriesResponse>(
+        `/api/journal-entries?limit=20&offset=${pageParam}&sort=${sort}`
+      )
+      return response
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.hasMore) {
+        return lastPage.entries.length
+      }
+      return undefined
+    },
     enabled: enabled ?? status === 'authenticated',
     staleTime: 2 * 60 * 1000, // 2 minutes
   })

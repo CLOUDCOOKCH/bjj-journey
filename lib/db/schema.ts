@@ -55,6 +55,8 @@ export const verificationTokens = pgTable('verification_tokens', {
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
   belt: varchar('belt', { length: 50 }).notNull().default('white'),
+  stripes: integer('stripes').notNull().default(0),
+  currentBeltDate: date('current_belt_date'),
   monthlyGoal: integer('monthly_goal').notNull().default(12),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
@@ -65,6 +67,9 @@ export const journalEntries = pgTable('journal_entries', {
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   entryDate: date('entry_date').notNull(),
   sessionType: varchar('session_type', { length: 20 }).notNull().default('regular'),
+  title: text('title'),
+  focusAreas: text('focus_areas'),
+  intensityLevel: integer('intensity_level'),
   durationMinutes: integer('duration_minutes').default(90),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),

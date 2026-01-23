@@ -15,6 +15,20 @@
       "when": 1769191248112,
       "tag": "0001_overjoyed_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769193735428,
+      "tag": "0002_brief_cassandra_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769197509458,
+      "tag": "0003_classy_silver_samurai",
+      "breakpoints": true
     }
   ]
 }
