@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Calendar, BookOpen, Plus, User } from "lucide-react"
+import { LayoutDashboard, Calendar, BookOpen, Plus, Video } from "lucide-react"
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/journal", label: "Journal", icon: BookOpen },
-  { href: "/settings", label: "Profile", icon: User },
+  { href: "/techniques", label: "Techniques", icon: Video },
 ]
 
 export function MobileBottomNav() {

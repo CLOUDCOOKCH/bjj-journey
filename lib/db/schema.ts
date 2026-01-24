@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, integer, timestamp, date, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, integer, timestamp, date, index, boolean } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 // ============================================================================
@@ -103,6 +103,39 @@ export const achievements = pgTable('achievements', {
   achievedDateIdx: index('achievements_achieved_date_idx').on(table.achievedDate),
 }))
 
+export const reviewTechniques = pgTable('review_techniques', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 200 }).notNull(),
+  description: text('description'),
+  category: varchar('category', { length: 50 }), // 'guard', 'submissions', 'sweeps', 'takedowns', 'transitions', 'escapes'
+  beltLevel: varchar('belt_level', { length: 20 }), // 'white', 'blue', 'purple', 'brown', 'black'
+  difficulty: varchar('difficulty', { length: 20 }), // 'beginner', 'intermediate', 'advanced', 'expert'
+  trainingType: varchar('training_type', { length: 20 }), // 'gi', 'no-gi', 'both'
+  notes: text('notes'), // Markdown content
+  viewCount: integer('view_count').notNull().default(0),
+  lastReviewed: timestamp('last_reviewed'),
+  isFavorite: boolean('is_favorite').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => ({
+  userIdIdx: index('review_techniques_user_id_idx').on(table.userId),
+  categoryIdx: index('review_techniques_category_idx').on(table.category),
+  beltLevelIdx: index('review_techniques_belt_level_idx').on(table.beltLevel),
+}))
+
+export const reviewTechniqueVideos = pgTable('review_technique_videos', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  reviewTechniqueId: uuid('review_technique_id').notNull().references(() => reviewTechniques.id, { onDelete: 'cascade' }),
+  youtubeUrl: text('youtube_url').notNull(),
+  title: varchar('title', { length: 200 }),
+  thumbnailUrl: text('thumbnail_url'),
+  orderIndex: integer('order_index').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  reviewTechniqueIdIdx: index('review_technique_videos_technique_id_idx').on(table.reviewTechniqueId),
+}))
+
 // ============================================================================
 // Relations
 // ============================================================================
@@ -113,6 +146,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   profiles: many(profiles),
   journalEntries: many(journalEntries),
   achievements: many(achievements),
+  reviewTechniques: many(reviewTechniques),
 }))
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -158,6 +192,21 @@ export const achievementsRelations = relations(achievements, ({ one }) => ({
   }),
 }))
 
+export const reviewTechniquesRelations = relations(reviewTechniques, ({ one, many }) => ({
+  user: one(users, {
+    fields: [reviewTechniques.userId],
+    references: [users.id],
+  }),
+  videos: many(reviewTechniqueVideos),
+}))
+
+export const reviewTechniqueVideosRelations = relations(reviewTechniqueVideos, ({ one }) => ({
+  reviewTechnique: one(reviewTechniques, {
+    fields: [reviewTechniqueVideos.reviewTechniqueId],
+    references: [reviewTechniques.id],
+  }),
+}))
+
 // ============================================================================
 // Type Exports
 // ============================================================================
@@ -172,3 +221,7 @@ export type Technique = typeof techniques.$inferSelect
 export type NewTechnique = typeof techniques.$inferInsert
 export type Achievement = typeof achievements.$inferSelect
 export type NewAchievement = typeof achievements.$inferInsert
+export type ReviewTechnique = typeof reviewTechniques.$inferSelect
+export type NewReviewTechnique = typeof reviewTechniques.$inferInsert
+export type ReviewTechniqueVideo = typeof reviewTechniqueVideos.$inferSelect
+export type NewReviewTechniqueVideo = typeof reviewTechniqueVideos.$inferInsert

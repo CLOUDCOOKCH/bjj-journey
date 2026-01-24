@@ -46,3 +46,16 @@ export {
   useProgressStats,
   progressKeys,
 } from './use-progress'
+
+// Review technique hooks
+export {
+  useReviewTechniques,
+  useReviewTechnique,
+  useCreateReviewTechnique,
+  useUpdateReviewTechnique,
+  useDeleteReviewTechnique,
+  useToggleFavorite,
+  reviewTechniqueKeys,
+  type ReviewTechniqueWithVideos,
+  type ReviewTechniquesFilters,
+} from './use-review-techniques'

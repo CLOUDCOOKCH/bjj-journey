@@ -193,19 +193,19 @@ export default function JournalPage() {
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
         <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">
-          <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <header className="flex flex-col gap-4 sm:gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">Journal</h1>
-              <p className="text-muted-foreground">Your complete training history & progress logs</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Journal</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Your complete training history & progress logs</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search sessions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 bg-background/50 border-border w-64 rounded-full"
+                  className="pl-10 pr-10 bg-background/50 border-border w-full sm:w-64 rounded-full"
                 />
                 {searchQuery && (
                   <Button
@@ -218,10 +218,11 @@ export default function JournalPage() {
                   </Button>
                 )}
               </div>
-              <Button asChild className="rounded-full shadow-lg shadow-primary/10">
+              <Button asChild className="rounded-full shadow-lg shadow-primary/10 w-full sm:w-auto justify-center">
                 <Link href="/start-training">
                   <BookOpen className="h-4 w-4 mr-2" />
-                  New Session
+                  <span className="hidden sm:inline">New Session</span>
+                  <span className="sm:hidden">New</span>
                 </Link>
               </Button>
             </div>

@@ -108,6 +108,44 @@ export const achievementSchema = z.object({
 })
 
 // ============================================================================
+// Review Technique Schemas
+// ============================================================================
+
+export const reviewTechniqueSchema = z.object({
+  name: z.string().min(1, 'Technique name is required').max(200, 'Technique name too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  category: z.enum(['guard', 'submissions', 'sweeps', 'takedowns', 'transitions', 'escapes']).optional(),
+  beltLevel: z.enum(['white', 'blue', 'purple', 'brown', 'black']).optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
+  trainingType: z.enum(['gi', 'no-gi', 'both']).optional(),
+  notes: z.string().optional(),
+  videos: z.array(z.object({
+    youtubeUrl: z.string().url('Invalid YouTube URL'),
+    title: z.string().max(200).optional(),
+  })).optional(),
+})
+
+export const reviewTechniqueUpdateSchema = z.object({
+  name: z.string().min(1, 'Technique name is required').max(200, 'Technique name too long').optional(),
+  description: z.string().max(500, 'Description too long').optional(),
+  category: z.enum(['guard', 'submissions', 'sweeps', 'takedowns', 'transitions', 'escapes']).optional(),
+  beltLevel: z.enum(['white', 'blue', 'purple', 'brown', 'black']).optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
+  trainingType: z.enum(['gi', 'no-gi', 'both']).optional(),
+  notes: z.string().optional(),
+  isFavorite: z.boolean().optional(),
+  videos: z.array(z.object({
+    youtubeUrl: z.string().url('Invalid YouTube URL'),
+    title: z.string().max(200).optional(),
+  })).optional(),
+})
+
+export const reviewTechniqueVideoSchema = z.object({
+  youtubeUrl: z.string().url('Invalid YouTube URL'),
+  title: z.string().max(200).optional(),
+})
+
+// ============================================================================
 // Type Exports
 // ============================================================================
 
@@ -119,3 +157,6 @@ export type JournalEntryUpdateInput = z.infer<typeof journalEntryUpdateSchema>
 export type TechniqueInput = z.infer<typeof techniqueSchema>
 export type TechniqueUpdateInput = z.infer<typeof techniqueUpdateSchema>
 export type AchievementInput = z.infer<typeof achievementSchema>
+export type ReviewTechniqueInput = z.infer<typeof reviewTechniqueSchema>
+export type ReviewTechniqueUpdateInput = z.infer<typeof reviewTechniqueUpdateSchema>
+export type ReviewTechniqueVideoInput = z.infer<typeof reviewTechniqueVideoSchema>

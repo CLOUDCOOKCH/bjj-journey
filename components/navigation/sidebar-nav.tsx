@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Calendar, BookOpen, Award, Shield, LogOut, Settings } from "lucide-react"
+import { LayoutDashboard, Calendar, BookOpen, Award, Shield, LogOut, Settings, Video } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 
@@ -10,6 +10,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/journal", label: "Journal", icon: BookOpen },
+  { href: "/techniques", label: "Techniques", icon: Video },
   { href: "/achievements", label: "Achievements", icon: Award },
 ]
 
