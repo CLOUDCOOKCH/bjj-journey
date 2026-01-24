@@ -4,7 +4,9 @@ import { redirect } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
-import { DashboardHeader } from "@/components/dashboard-header"
+import { PageHeader } from "@/components/page-header"
+import { Bell, Settings } from "lucide-react"
+import Link from "next/link"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentEntries } from "@/components/recent-entries"
 import { MonthlyChart } from "@/components/monthly-chart"
@@ -120,9 +122,22 @@ export default function DashboardPage() {
       <MobileBottomNav />
 
       <main className="lg:ml-64 pb-20 lg:pb-8">
+        <PageHeader
+          title="Training Dashboard"
+          subtitle={`Welcome back, ${session?.user?.name?.split(" ")[0] || "Athlete"}. Oss!`}
+          actions={
+            <>
+              <button className="p-2 text-muted-foreground hover:text-primary transition-colors relative" aria-label="Notifications">
+                <Bell className="text-xl" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
+              </button>
+              <Link href="/settings" className="p-2 text-muted-foreground hover:text-primary transition-colors" aria-label="Settings">
+                <Settings className="text-xl" />
+              </Link>
+            </>
+          }
+        />
         <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">
-          {/* Header */}
-          <DashboardHeader userName={session?.user?.name?.split(" ")[0]} />
 
           {/* Stats Grid - 3 Cards */}
           <DashboardStats

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api/auth'
 import { db } from '@/lib/db'
 import { reviewTechniques, reviewTechniqueVideos } from '@/lib/db/schema'
-import { desc, asc, eq, and, or, like, sql } from 'drizzle-orm'
+import { desc, asc, eq, and, or, ilike, sql } from 'drizzle-orm'
 import { reviewTechniqueSchema } from '@/lib/validations/schema'
 import { handleApiError } from '@/lib/api/errors'
 
@@ -45,9 +45,9 @@ export async function GET(request: NextRequest) {
       // When searching: all base filters must be true AND (name matches OR description matches OR notes match)
       // Use COALESCE to handle NULL descriptions and notes
       const searchCondition = or(
-        like(reviewTechniques.name, `%${search}%`),
-        like(sql`COALESCE(${reviewTechniques.description}, '')`, `%${search}%`),
-        like(sql`COALESCE(${reviewTechniques.notes}, '')`, `%${search}%`)
+        ilike(reviewTechniques.name, `%${search}%`),
+        ilike(sql`COALESCE(${reviewTechniques.description}, '')`, `%${search}%`),
+        ilike(sql`COALESCE(${reviewTechniques.notes}, '')`, `%${search}%`)
       )
       finalWhere = and(...baseFilters, searchCondition!)
     } else {

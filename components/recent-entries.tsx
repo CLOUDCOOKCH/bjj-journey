@@ -90,7 +90,7 @@ export function RecentEntries({ entries }: RecentEntriesProps) {
             variant="ghost"
             className="text-primary hover:text-primary/80 text-xs font-bold uppercase tracking-widest"
           >
-            <Link href="/calendar">View All History</Link>
+            <Link href="/journal">View All History</Link>
           </Button>
         </div>
 

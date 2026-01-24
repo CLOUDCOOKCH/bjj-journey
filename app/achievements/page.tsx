@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { PageSkeleton } from "@/components/loading/page-skeleton"
+import { PageHeader } from "@/components/page-header"
 
 export default function AchievementsPage() {
   const { data: session, status } = useSession()
@@ -136,15 +137,11 @@ export default function AchievementsPage() {
         <div style={{ viewTransitionName: 'main-content' } as React.CSSProperties}>
 
           {/* Header */}
-          <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-8 bg-background/80 backdrop-blur-md border-b border-border/50">
-            <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-foreground font-heading">Progress Tracking</h1>
-              <p className="text-xs lg:text-sm text-muted-foreground font-medium">
-                Your path to the Black Belt.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
+          {/* Header */}
+          <PageHeader
+            title="Progress Tracking"
+            subtitle="Your path to the Black Belt."
+            actions={
               <Button
                 onClick={() => setIsDialogOpen(true)}
                 size="sm"
@@ -153,8 +150,8 @@ export default function AchievementsPage() {
                 <Plus className="w-4 h-4 mr-2" />
                 Add
               </Button>
-            </div>
-          </header>
+            }
+          />
 
           <div className="p-8 space-y-8">
 

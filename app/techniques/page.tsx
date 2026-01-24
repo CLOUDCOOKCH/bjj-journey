@@ -1,28 +1,27 @@
 'use client'
 
-import { redirect } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { SidebarNav } from '@/components/navigation/sidebar-nav'
 import { MobileBottomNav } from '@/components/navigation/mobile-bottom-nav'
 import { useReviewTechniques, useUpdateReviewTechnique } from '@/lib/hooks'
 import { Button } from '@/components/ui/button'
-import { Plus, Video as VideoIcon } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { TechniqueFilters } from '@/components/review-techniques/technique-filters'
 import { TechniqueCategories } from '@/components/review-techniques/technique-categories'
 import { TechniqueReviewGrid } from '@/components/review-techniques/technique-review-grid'
-import { TechniqueReviewDialog } from '@/components/review-techniques/technique-review-dialog'
 import type { ReviewTechniquesFilters } from '@/lib/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { reviewTechniqueKeys } from '@/lib/hooks/use-review-techniques'
+import { PageHeader } from '@/components/page-header'
 
 export default function TechniquesPage() {
   const { data: session, status } = useSession()
   const isAuthenticated = status === 'authenticated'
   const queryClient = useQueryClient()
+  const router = useRouter()
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingTechnique, setEditingTechnique] = useState<any>(null)
   const [filters, setFilters] = useState<ReviewTechniquesFilters>({
     category: undefined,
     trainingType: undefined,
@@ -77,13 +76,11 @@ export default function TechniquesPage() {
   }
 
   const handleEdit = (technique: any) => {
-    setEditingTechnique(technique)
-    setIsDialogOpen(true)
+    router.push(`/techniques/manage?id=${technique.id}`)
   }
 
   const handleAddNew = () => {
-    setEditingTechnique(null)
-    setIsDialogOpen(true)
+    router.push('/techniques/manage')
   }
 
   return (
@@ -95,29 +92,21 @@ export default function TechniquesPage() {
 
       {/* Main Content */}
       <main className="flex-1 lg:ml-64 pb-24 lg:pb-8">
+        <PageHeader
+          title="Technique Review"
+          subtitle="Build your personal library of techniques to review before training"
+          actions={
+            <Button
+              onClick={handleAddNew}
+              className="bg-teal-500 text-slate-950 hover:bg-teal-400 rounded-2xl font-semibold"
+              size="lg"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Technique
+            </Button>
+          }
+        />
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-8">
-          {/* Header */}
-          <header className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
-                  Technique Review
-                </h1>
-                <p className="text-slate-400">
-                  Build your personal library of techniques to review before training
-                </p>
-              </div>
-              <Button
-                onClick={handleAddNew}
-                className="bg-teal-500 text-slate-950 hover:bg-teal-400 rounded-2xl font-semibold"
-                size="lg"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Add Technique
-              </Button>
-            </div>
-          </header>
-
           {/* Filters */}
           <div className="space-y-6 mb-8">
             <TechniqueFilters
@@ -154,16 +143,6 @@ export default function TechniquesPage() {
       >
         <Plus className="text-slate-950 w-6 h-6" />
       </Button>
-
-      {/* Add/Edit Dialog */}
-      <TechniqueReviewDialog
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false)
-          setEditingTechnique(null)
-        }}
-        technique={editingTechnique}
-      />
     </div>
   )
 }

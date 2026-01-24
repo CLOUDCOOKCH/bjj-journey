@@ -33,17 +33,16 @@ export function QuickActions() {
           const Icon = action.icon
 
           return (
-            <Link key={action.label} href={action.href}>
+            <Link key={action.label} href={action.href} className="h-full block">
               <button
                 className={`
-                  w-full h-auto py-4 px-6 rounded-2xl
+                  w-full h-full py-4 px-6 rounded-2xl
                   transition-all shadow-lg
                   hover:scale-[1.02] active:scale-95
                   flex items-center justify-center gap-3
-                  ${
-                    action.variant === "primary"
-                      ? "bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-primary/10 hover:shadow-xl"
-                      : "bg-card/40 backdrop-blur-md border-border/50 text-foreground font-semibold hover:bg-card/60"
+                  ${action.variant === "primary"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-primary/10 hover:shadow-xl"
+                    : "bg-card/40 backdrop-blur-md border-border/50 text-foreground font-semibold hover:bg-card/60"
                   }
                 `}
               >

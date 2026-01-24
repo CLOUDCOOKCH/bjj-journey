@@ -20,6 +20,7 @@ import { formatDateToYYYYMMDD } from "@/lib/utils/date"
 import { useJournalEntries } from "@/lib/hooks"
 import { StartTrainingSearchParams } from "@/components/start-training/start-training-search-params"
 import { PageSkeleton } from "@/components/loading/page-skeleton"
+import { PageHeader } from "@/components/page-header"
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -133,24 +134,11 @@ function StartTrainingForm({ searchParams, userId, entries }: { searchParams: UR
       <MobileBottomNav />
 
       <main className="lg:ml-64 pb-20 lg:pb-8">
-        <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-4 lg:px-8 bg-background/80 backdrop-blur-md border-b border-border">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => router.back()}
-              className="border-border hover:bg-card"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Start Training Session</h1>
-              <p className="text-xs text-muted-foreground font-medium">
-                Logging session for {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-              </p>
-            </div>
-          </div>
-        </header>
+        <PageHeader
+          title="Start Training Session"
+          subtitle={`Logging session for ${selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`}
+          backButton={true}
+        />
 
         <div className="container mx-auto px-4 lg:px-8 py-8 max-w-5xl">
           <form onSubmit={(e) => { e.preventDefault(); handleSave() }} className="space-y-8">
@@ -204,14 +192,14 @@ function StartTrainingForm({ searchParams, userId, entries }: { searchParams: UR
               />
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 rounded-3xl bg-card/40 border border-border/50">
+            <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="md:col-span-1 p-6 rounded-3xl bg-card/40 border border-border/50">
                 <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6 block">
                   Intensity Level
                 </Label>
                 <IntensityLevelBar value={intensityLevel} onChange={setIntensityLevel} />
               </div>
-              <div className="p-6 rounded-3xl bg-card/40 border border-border/50">
+              <div className="md:col-span-3 p-6 rounded-3xl bg-card/40 border border-border/50">
                 <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 block">
                   Session Notes (Markdown supported)
                 </Label>

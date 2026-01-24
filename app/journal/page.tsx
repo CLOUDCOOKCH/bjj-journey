@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useQueryClient } from "@tanstack/react-query"
 import { JournalSkeleton } from "@/components/loading/page-skeleton"
+import { PageHeader } from "@/components/page-header"
 
 const sessionTypes = [
   { value: "all", label: "All" },
@@ -192,41 +193,40 @@ export default function JournalPage() {
       <SidebarNav belt={profile?.belt} name={profile?.user?.name || undefined} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
+        <PageHeader
+          title="Journal"
+          subtitle="Your complete training history & progress logs"
+          actions={
+            <Button asChild className="rounded-full shadow-lg shadow-primary/10 w-full sm:w-auto justify-center">
+              <Link href="/start-training">
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">New Session</span>
+                <span className="sm:hidden">New</span>
+              </Link>
+            </Button>
+          }
+        />
         <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">
-          <header className="flex flex-col gap-4 sm:gap-6">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Journal</h1>
-              <p className="text-sm sm:text-base text-muted-foreground">Your complete training history & progress logs</p>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="relative flex-1 sm:flex-none">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search sessions..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 bg-background/50 border-border w-full sm:w-64 rounded-full"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <Button asChild className="rounded-full shadow-lg shadow-primary/10 w-full sm:w-auto justify-center">
-                <Link href="/start-training">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">New Session</span>
-                  <span className="sm:hidden">New</span>
-                </Link>
+          {/* Search Bar */}
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search sessions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 bg-background/50 border-border w-full rounded-full"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="h-4 w-4" />
               </Button>
-            </div>
-          </header>
+            )}
+          </div>
 
           <section className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -376,7 +376,7 @@ export default function JournalPage() {
                                     </div>
                                   </div>
 
-                                  <div className="flex lg:hidden items-center gap-4 text-xs text-muted-foreground">
+                                  <div className="flex sm:hidden items-center gap-4 text-xs text-muted-foreground">
                                     <div className="flex items-center gap-1.5">
                                       <Clock className="h-4 w-4 text-primary" />
                                       <span>{entry.durationMinutes || 0} mins</span>

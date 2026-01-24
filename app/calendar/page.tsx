@@ -5,7 +5,9 @@ import { redirect, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import CalendarView from "@/components/calendar-view"
 import { CalendarSidebar } from "@/components/calendar-sidebar"
-import { CalendarHeader } from "@/components/calendar-header"
+import { PageHeader } from "@/components/page-header"
+import { Bell, Settings } from "lucide-react"
+import Link from "next/link"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { useJournalEntries, useProfile } from "@/lib/hooks"
@@ -43,7 +45,21 @@ export default function CalendarPage() {
       <SidebarNav belt={profile?.belt} name={profile?.user?.name || undefined} />
       <MobileBottomNav />
       <main className="lg:ml-64 pb-20 lg:pb-8">
-        <CalendarHeader currentDate={new Date()} userName={session?.user?.name?.split(" ")[0]} />
+        <PageHeader
+          title="Training Calendar"
+          subtitle={`${new Date().toLocaleDateString('en-US', { month: 'long' })} ${new Date().getFullYear()} Overview`}
+          actions={
+            <>
+              <button className="p-2 text-muted-foreground hover:text-primary transition-colors relative" aria-label="Notifications">
+                <Bell className="text-xl" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
+              </button>
+              <Link href="/settings" className="p-2 text-muted-foreground hover:text-primary transition-colors" aria-label="Settings">
+                <Settings className="text-xl" />
+              </Link>
+            </>
+          }
+        />
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-3">
