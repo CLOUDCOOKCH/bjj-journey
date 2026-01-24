@@ -71,6 +71,7 @@ describe('Authentication Schemas', () => {
   describe('signUpSchema', () => {
     it('valid signup data passes', () => {
       const result = signUpSchema.safeParse({
+        name: 'Test User',
         email: 'test@example.com',
         password: 'password123',
         confirmPassword: 'password123'
@@ -80,6 +81,7 @@ describe('Authentication Schemas', () => {
 
     it('passwords do not match fails', () => {
       const result = signUpSchema.safeParse({
+        name: 'Test User',
         email: 'test@example.com',
         password: 'password123',
         confirmPassword: 'password456'
