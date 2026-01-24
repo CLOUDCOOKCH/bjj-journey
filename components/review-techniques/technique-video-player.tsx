@@ -61,21 +61,21 @@ export function TechniqueVideoPlayer({ videos, onClose, open }: TechniqueVideoPl
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-4xl w-full p-0 overflow-hidden glass-card"
+        className="max-w-4xl w-full p-0 max-h-[85vh] overflow-y-auto glass-card flex flex-col"
         showCloseButton={false}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50">
-          <h3 className="text-lg font-semibold text-slate-100">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 shrink-0 sticky top-0 bg-inherit z-10 backdrop-blur-md">
+          <h3 className="text-lg font-semibold text-slate-100 truncate flex-1 min-w-0 pr-4">
             {currentVideo.title || `Video ${currentIndex + 1}`}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {videos.length > 1 && (
               <>
                 <Button variant="ghost" size="icon" onClick={goToPrevious} className="text-slate-400 hover:text-slate-100">
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
-                <span className="text-sm text-slate-500 min-w-[3rem] text-center">
+                <span className="text-sm text-slate-500 min-w-[3rem] text-center hidden sm:inline-block">
                   {currentIndex + 1} / {videos.length}
                 </span>
                 <Button variant="ghost" size="icon" onClick={goToNext} className="text-slate-400 hover:text-slate-100">
@@ -90,7 +90,7 @@ export function TechniqueVideoPlayer({ videos, onClose, open }: TechniqueVideoPl
         </div>
 
         {/* Video Embed */}
-        <div className="aspect-video bg-black">
+        <div className="aspect-video bg-black shrink-0">
           <iframe
             key={`${videoId}-${currentIndex}`}
             width="100%"
@@ -105,17 +105,17 @@ export function TechniqueVideoPlayer({ videos, onClose, open }: TechniqueVideoPl
 
         {/* Video List (only show if multiple videos) */}
         {videos.length > 1 && (
-          <div className="p-4 border-t border-border/50 bg-slate-950/50">
-            <div className="flex gap-2 overflow-x-auto">
+          <div className="p-4 border-t border-border/50 bg-slate-950/50 grow">
+            <div className="flex gap-2 overflow-x-auto pb-2">
               {videos.map((video, index) => (
                 <button
+                  type="button"
                   key={video.id}
                   onClick={() => setCurrentIndex(index)}
-                  className={`flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-                    index === currentIndex
+                  className={`flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${index === currentIndex
                       ? 'border-teal-500 shadow-lg shadow-teal-500/20'
                       : 'border-transparent hover:border-slate-600'
-                  }`}
+                    }`}
                 >
                   {video.thumbnailUrl ? (
                     <img
