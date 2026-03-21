@@ -20,6 +20,10 @@
   Track your sessions. Document your techniques. Celebrate your progress.
 </p>
 
+<p align="center">
+  <a href="https://bjj-journey.netlify.app/"><img src="https://img.shields.io/badge/Live_Demo-bjj--journey.netlify.app-00C7B7?style=flat-square&logo=netlify" alt="Live Demo" /></a>
+</p>
+
 ---
 
 ## About
