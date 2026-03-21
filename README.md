@@ -97,8 +97,8 @@ BJJ Journey is a full-stack web app for tracking your Brazilian Jiu Jitsu traini
 
 ```bash
 # Clone the repository
-git clone https://github.com/dennisrongo/jiu-jitsu-tracker.git
-cd jiu-jitsu-tracker
+git clone https://github.com/dennisrongo/bjj-journey.git
+cd bjj-journey
 
 # Install dependencies
 npm install
