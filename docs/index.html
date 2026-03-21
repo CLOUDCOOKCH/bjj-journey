@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BJJ Journey - Track Your Brazilian Jiu Jitsu Training</title>
+  <meta name="description" content="Your complete Brazilian Jiu Jitsu training companion. Track sessions, document techniques, and celebrate progress." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #020617;
+      --bg-card: rgba(15, 23, 42, 0.6);
+      --primary: #2dd4bf;
+      --primary-glow: rgba(45, 212, 191, 0.15);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .ambient::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: -20%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(ellipse, var(--primary-glow) 0%, transparent 70%);
+      animation: float 20s ease-in-out infinite;
+    }
+    .ambient::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      right: -20%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+      animation: float 25s ease-in-out infinite reverse;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(1deg); }
+      66% { transform: translate(-20px, 20px) rotate(-1deg); }
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(20px);
+      background: rgba(2, 6, 23, 0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
+    }
+    .logo-icon svg { width: 20px; height: 20px; }
+    .logo span { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #020617;
+      box-shadow: 0 0 30px rgba(45, 212, 191, 0.2);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 40px rgba(45, 212, 191, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      background: var(--primary-glow);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 7vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+    .hero-image {
+      margin-top: 4rem;
+      max-width: 1100px;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), 0 0 60px var(--primary-glow);
+    }
+    .hero-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Features */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .section-header h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(45, 212, 191, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--primary-glow);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      color: var(--primary);
+    }
+    .feature-icon svg { width: 24px; height: 24px; }
+    .feature-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+
+    /* Screenshots */
+    .screenshots {
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+    }
+    .screenshot-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    .screenshot-row.reverse { direction: rtl; }
+    .screenshot-row.reverse > * { direction: ltr; }
+    .screenshot-text h3 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .screenshot-text p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+    .screenshot-img {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s;
+    }
+    .screenshot-img:hover { transform: scale(1.02); }
+    .screenshot-img img { width: 100%; height: auto; display: block; }
+
+    /* Tech Stack */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .tech-item {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .tech-item:hover {
+      border-color: rgba(45, 212, 191, 0.2);
+      transform: translateY(-2px);
+    }
+    .tech-item .tech-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .tech-item .tech-desc { color: var(--text-muted); font-size: 0.8rem; }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 6rem 2rem;
+      position: relative;
+    }
+    .cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, var(--primary-glow) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cta h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .cta p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .cta .btn { position: relative; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--primary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .screenshot-row,
+      .screenshot-row.reverse { grid-template-columns: 1fr; }
+      .hero { padding: 7rem 1.5rem 3rem; }
+      .section { padding: 4rem 1.5rem; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span>BJJ Journey</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#stack">Tech Stack</a>
+      <a href="https://github.com/dennisrongo/jiu-jitsu-tracker" class="btn btn-ghost">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="badge">Open Source BJJ Training Tracker</div>
+  <h1>Track Your <span class="gradient">BJJ Journey</span></h1>
+  <p>A modern, full-stack training companion for Brazilian Jiu Jitsu practitioners. Log sessions, document techniques, track belt progression, and watch your growth over time.</p>
+  <div class="hero-buttons">
+    <a href="https://github.com/dennisrongo/jiu-jitsu-tracker" class="btn btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      View on GitHub
+    </a>
+    <a href="#screenshots" class="btn btn-ghost">See Screenshots</a>
+  </div>
+  <div class="hero-image">
+    <img src="https://raw.githubusercontent.com/dennisrongo/jiu-jitsu-tracker/main/public/screenshots/image.png" alt="BJJ Journey Dashboard" loading="lazy" />
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="section-header">
+    <h2>Everything You Need</h2>
+    <p>Built specifically for BJJ practitioners who want to take their training seriously.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <h3>Training Dashboard</h3>
+      <p>Real-time stats at a glance - total sessions, monthly progress, current streak, and a training volume chart.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <h3>Interactive Calendar</h3>
+      <p>Visual calendar with color-coded session types, mat time tracking, and one-click session logging.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      </div>
+      <h3>Training Journal</h3>
+      <p>Log every session with notes, intensity levels, duration, and session type. Filter and search your history.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      </div>
+      <h3>Technique Library</h3>
+      <p>Document techniques with YouTube links and personal notes. Build your own reference library over time.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Belt Progression</h3>
+      <p>Visual belt timeline from white to black. Track stripe milestones and keep a full promotion history.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+      </div>
+      <h3>Achievements</h3>
+      <p>Celebrate belt promotions, stripe awards, and training milestones. Set monthly goals and track your consistency.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Screenshots -->
+<section class="section" id="screenshots">
+  <div class="section-header">
+    <h2>See It in Action</h2>
+    <p>A sleek dark-mode interface designed for focus and clarity.</p>
+  </div>
+  <div class="screenshots">
+    <div class="screenshot-row">
+      <div class="screenshot-text">
+        <h3>Training Calendar</h3>
+        <p>See your training at a glance with an interactive monthly calendar. Color-coded session types, mat time tracking, and the ability to quickly add past sessions make it easy to stay on top of your schedule.</p>
+      </div>
+      <div class="screenshot-img">
+        <img src="https://raw.githubusercontent.com/dennisrongo/jiu-jitsu-tracker/main/public/screenshots/image2.png" alt="Training Calendar" loading="lazy" />
+      </div>
+    </div>
+    <div class="screenshot-row reverse">
+      <div class="screenshot-text">
+        <h3>Training Journal</h3>
+        <p>Every session tells a story. Log session type, intensity, duration, techniques, and personal notes. Filter by type or search your entire history to find exactly what you need.</p>
+      </div>
+      <div class="screenshot-img">
+        <img src="https://raw.githubusercontent.com/dennisrongo/jiu-jitsu-tracker/main/public/screenshots/image3.png" alt="Training Journal" loading="lazy" />
+      </div>
+    </div>
+    <div class="screenshot-row">
+      <div class="screenshot-text">
+        <h3>Progress Tracking</h3>
+        <p>Visualize your journey from white to black belt. Track stripe progress, complete milestone checklists, and look back at your full promotion history as motivation to keep pushing forward.</p>
+      </div>
+      <div class="screenshot-img">
+        <img src="https://raw.githubusercontent.com/dennisrongo/jiu-jitsu-tracker/main/public/screenshots/image4.png" alt="Progress Tracking" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section class="section" id="stack">
+  <div class="section-header">
+    <h2>Built with Modern Tech</h2>
+    <p>A production-ready stack designed for performance and developer experience.</p>
+  </div>
+  <div class="tech-grid">
+    <div class="tech-item">
+      <div class="tech-name">Next.js 16</div>
+      <div class="tech-desc">React Framework</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">React 19</div>
+      <div class="tech-desc">UI Library</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">TypeScript 5</div>
+      <div class="tech-desc">Type Safety</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">Tailwind CSS 4</div>
+      <div class="tech-desc">Styling</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">PostgreSQL</div>
+      <div class="tech-desc">Database (Neon)</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">Drizzle ORM</div>
+      <div class="tech-desc">Type-safe SQL</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">NextAuth.js</div>
+      <div class="tech-desc">Authentication</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">TanStack Query</div>
+      <div class="tech-desc">Data Fetching</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Ready to Track Your Journey?</h2>
+  <p>BJJ Journey is free and open source. Clone it, customize it, make it yours.</p>
+  <a href="https://github.com/dennisrongo/jiu-jitsu-tracker" class="btn btn-primary">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    Get Started on GitHub
+  </a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>Built for the BJJ community by <a href="https://github.com/dennisrongo">dennisrongo</a></p>
+</footer>
+
+</body>
+</html>

@@ -34,7 +34,7 @@ export function SidebarNav({ belt, name }: SidebarNavProps) {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-[0_0_15px_-3px_rgba(45,212,191,0.4)]">
             <Shield className="text-white text-xl" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-foreground">JJ JOURNAL</span>
+          <span className="text-lg font-bold tracking-tight text-foreground">BJJ JOURNEY</span>
         </Link>
       </div>
 

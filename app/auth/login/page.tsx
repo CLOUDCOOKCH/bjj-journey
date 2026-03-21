@@ -223,7 +223,7 @@ export default function LoginPage() {
               <Notebook className="text-black text-3xl" />
             </div>
             <h2 className="text-2xl font-bold tracking-tight text-white">
-              Jiu Jitsu Journal
+              BJJ Journey
             </h2>
             <p className="text-slate-400 text-sm mt-1">
               Sign in to continue your training

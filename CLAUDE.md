@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Jiu Jitsu Journal is a Next.js 16 full-stack application for tracking Brazilian Jiu Jitsu training sessions, techniques, and achievements. It uses the App Router with React Server Components by default.
+BJJ Journey is a Next.js 16 full-stack application for tracking Brazilian Jiu Jitsu training sessions, techniques, and achievements. It uses the App Router with React Server Components by default.
 
 ## Commands
 

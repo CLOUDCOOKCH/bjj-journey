@@ -8,9 +8,9 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Jiu Jitsu Journal',
-  description: 'Track your Jiu Jitsu training journey',
-  generator: 'Jiu Jitsu Journal',
+  title: 'BJJ Journey',
+  description: 'Track your BJJ training journey',
+  generator: 'BJJ Journey',
   icons: {
     icon: [
       {
