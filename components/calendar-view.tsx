@@ -45,6 +45,7 @@ interface CalendarItem {
 interface Props {
   date: string
   today: string
+  defaultView?: View
   onDateChange: (date: string) => void
   onAdd: () => void
   onMove: (id: string, date: string) => void
@@ -55,8 +56,8 @@ interface Props {
 
 const viewLabels: Record<View, string> = { day: "Day", week: "Week", month: "Month" }
 
-export default function CalendarView({ date, today, onDateChange, onAdd, onMove, items, editForm, agenda }: Props) {
-  const [view, setView] = useState<View>("week")
+export default function CalendarView({ date, today, defaultView = "week", onDateChange, onAdd, onMove, items, editForm, agenda }: Props) {
+  const [view, setView] = useState(defaultView)
   const month = date.slice(0, 7)
   const monthStart = `${month}-01`
   const first = view === "month" ? firstDayOfWeek(monthStart) : firstDayOfWeek(date)

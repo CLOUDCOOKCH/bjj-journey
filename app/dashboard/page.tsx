@@ -4,7 +4,8 @@ import { useEffect, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { ArrowRight, Settings } from "lucide-react"
+import { ArrowRight, CalendarDays, Moon, Plus, Settings, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { PageHeader } from "@/components/page-header"
@@ -65,6 +66,7 @@ function ScheduleList({ items }: { items: ActivityOccurrence[] }) {
 
 export default function DashboardPage() {
   const { status } = useSession()
+  const { resolvedTheme, setTheme } = useTheme()
   const profile = useProfile(status === "authenticated")
   const journal = useCalendarJournalEntries()
   const activities = useTrainingList<TrainingData<"activities">>("activities")
@@ -113,9 +115,9 @@ export default function DashboardPage() {
   const monthStart = today.slice(0, 7) + "-01"
   const currentMonthSessions = entries.filter(({ entryDate }) => entryDate >= monthStart && entryDate <= today).length
   const currentStreak = matSessionStreak(entries.map(({ entryDate }) => entryDate), planned, today)
-  const monthlyData = Array.from({ length: 6 }, (_, index) => {
-    const month = addCalendarMonths(today, index - 5)
-    return { month: formatCalendarDate(month, { month: "short" }), sessions: entries.filter(({ entryDate }) => entryDate.startsWith(month.slice(0, 7))).length }
+  const monthlyData = Array.from({ length: 12 }, (_, index) => {
+    const month = addCalendarMonths(today, index - 11)
+    return { date: month.slice(0, 7) + "-01", month: formatCalendarDate(month, { month: "short" }), sessions: entries.filter(({ entryDate }) => entryDate.startsWith(month.slice(0, 7))).length }
   })
 
   const weeklyMetrics = [
@@ -167,7 +169,14 @@ export default function DashboardPage() {
       <MobileBottomNav />
       <main className="lg:ml-64 pb-24 lg:pb-8">
         <PageHeader title="Training dashboard" subtitle={formatCalendarDate(today, { weekday: "long", month: "long", day: "numeric" })} actions={
-          <Button asChild variant="ghost" size="icon"><Link href="/settings" aria-label="Training settings"><Settings /></Link></Button>
+          <>
+            <Button variant="ghost" size="icon" aria-label="Toggle colour theme"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+              <Moon className="dark:hidden" aria-hidden="true" />
+              <Sun className="hidden dark:block" aria-hidden="true" />
+            </Button>
+            <Button asChild variant="ghost" size="icon"><Link href="/settings" aria-label="Training settings"><Settings /></Link></Button>
+          </>
         } />
         <div className="mx-auto max-w-[96rem] space-y-5 px-4 py-5 sm:px-6">
           {(journal.isError || activities.isError || prefs.isError || profile.isError) && (
@@ -179,49 +188,64 @@ export default function DashboardPage() {
           {due.length > 0 && <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-2" role="status">
             <p className="text-sm font-semibold">Session reminders</p><ScheduleList items={due} />
           </div>}
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-            <section className="rounded-xl border bg-card p-4">
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-base font-semibold">Today’s training</h2>
-                <div className="flex flex-wrap gap-1">
-                  <Button asChild variant="ghost" size="sm"><Link href="/calendar">Open planner <ArrowRight /></Link></Button>
-                  <Button asChild size="sm"><Link href="/start-training">Log mat session</Link></Button>
-                </div>
+          <section className="overflow-hidden rounded-2xl border bg-card" aria-label="Mat training this week">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+              <div>
+                <h2 className="font-semibold">This week on the mats</h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">{formatCalendarDate(start, { month: "short", day: "numeric" })} – {formatCalendarDate(end, { month: "short", day: "numeric" })}</p>
               </div>
-              {todayPlan.length ? <><ScheduleList items={todayPlan} /><ul className="mt-2 flex flex-wrap gap-2">
-                {Object.entries(todayPlan.reduce<Record<string, number>>((totals, { record }) => {
-                  const label = activityStatusLabels[record.data.status]
-                  totals[label] = (totals[label] ?? 0) + 1
-                  return totals
-                }, {})).map(([label, count]) => <li key={label} className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">{count} {label.toLowerCase()}</li>)}
-              </ul></> : <Empty>No activities scheduled today.</Empty>}
-            </section>
-            <section className="rounded-xl border bg-card p-4">
-              <h2 className="text-base font-semibold">This week</h2>
-              <dl className="mt-2 grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
-                {weeklyMetrics.map(({ name, value, unit }) => <div key={name} className="bg-card px-3 py-2">
-                  <dt className="text-sm text-muted-foreground">{name}</dt>
-                  <dd className="text-2xl font-semibold tabular-nums">{value} <span className="text-xs font-normal text-muted-foreground">{unit}</span></dd>
-                </div>)}
-              </dl>
-            </section>
-          </div>
-          {latestFocus && (
-            <section className="rounded-xl border bg-card p-4">
-              <h2 className="font-semibold">Drill next</h2>
-              <p className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{latestFocus.trainingDetails?.techniquesToImprove}</p>
-              <Link className="mt-2 inline-flex min-h-10 items-center gap-1 text-sm font-medium text-primary hover:underline"
-                href={`/start-training?entryId=${latestFocus.id}`}>
-                Review the session <ArrowRight className="size-3" aria-hidden />
-              </Link>
-            </section>
-          )}
-          <DashboardWidgets widgets={widgets} preferences={userPreferences.find(({ data }) => data.key === "dashboard")} />
-          <DashboardStats totalSessions={entries.length} currentMonthSessions={currentMonthSessions} currentStreak={currentStreak} monthlyGoal={profile.data?.monthlyGoal ?? 12} />
-          <div className="grid gap-4 lg:grid-cols-2">
-            <RecentEntries entries={entries.slice(0, 3)} />
+              <Button asChild><Link href="/start-training"><Plus aria-hidden="true" /> Log mat session</Link></Button>
+            </div>
+            <dl className="grid grid-cols-3 divide-x">
+              {weeklyMetrics.map(({ name, value, unit }) => (
+                <div key={name} className="min-w-0 px-3 py-4 sm:px-6">
+                  <dt className="text-xs text-muted-foreground sm:text-sm">{name}</dt>
+                  <dd className="mt-1 text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">
+                    {value}{unit && <span className="ml-1 text-xs font-normal text-muted-foreground">{unit}</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(18rem,1fr)]">
             <MonthlyChart data={monthlyData} />
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+              <section className="min-w-0 rounded-2xl border bg-card p-4 sm:p-5">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="font-semibold">Today’s training</h2>
+                  <Button asChild variant="ghost" size="sm"><Link href="/calendar"><CalendarDays aria-hidden="true" /> Planner</Link></Button>
+                </div>
+                {todayPlan.length ? <>
+                  <ScheduleList items={todayPlan} />
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {Object.entries(todayPlan.reduce<Record<string, number>>((totals, { record }) => {
+                      const label = activityStatusLabels[record.data.status]
+                      totals[label] = (totals[label] ?? 0) + 1
+                      return totals
+                    }, {})).map(([label, count]) => (
+                      <li key={label} className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">{count} {label.toLowerCase()}</li>
+                    ))}
+                  </ul>
+                </> : <Empty>No sessions planned for today.</Empty>}
+              </section>
+              <section className="min-w-0 rounded-2xl border bg-muted/35 p-4 sm:p-5">
+                <h2 className="mb-2 font-semibold">Drill next</h2>
+                {latestFocus ? <>
+                  <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{latestFocus.trainingDetails?.techniquesToImprove}</p>
+                  <Link className="mt-2 inline-flex min-h-10 items-center gap-1 rounded text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+                    href={`/start-training?entryId=${latestFocus.id}`}>
+                    Review session <ArrowRight className="size-3" aria-hidden="true" />
+                  </Link>
+                </> : <Empty>Add a drill note when you log a mat session.</Empty>}
+              </section>
+            </div>
           </div>
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+            <RecentEntries entries={entries.slice(0, 3)} />
+            <DashboardStats totalSessions={entries.length} currentMonthSessions={currentMonthSessions} currentStreak={currentStreak} monthlyGoal={profile.data?.monthlyGoal ?? 12} />
+          </div>
+          <DashboardWidgets widgets={widgets} preferences={userPreferences.find(({ data }) => data.key === "dashboard")} />
         </div>
       </main>
     </div>

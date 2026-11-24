@@ -55,7 +55,7 @@ export function RecentEntries({ entries }: { entries: RecentEntry[] }) {
       {entries.length === 0
         ? <p className="text-sm text-muted-foreground">Your logged mat sessions appear here.</p>
         : <ul className="divide-y">{entries.slice(0, 3).map((entry) => <li key={entry.id} className="flex min-w-0 items-center gap-2">
-          <Link href={`/journal/${entry.id}`} className="min-w-0 flex-1 rounded py-2 hover:text-primary focus-visible:outline-2 focus-visible:outline-ring">
+          <Link href={`/journal/${entry.id}/details`} className="min-w-0 flex-1 rounded py-2 hover:text-primary focus-visible:outline-2 focus-visible:outline-ring">
             <span className="block truncate text-sm font-medium">{entry.title || journalSessionLabel(entry.sessionType)}</span>
             <span className="block text-xs text-muted-foreground">
               {formatCalendarDate(entry.entryDate, { month: "short", day: "numeric" })}

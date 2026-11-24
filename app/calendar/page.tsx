@@ -240,7 +240,7 @@ function CalendarContent() {
                 <Button variant="outline" size="sm" onClick={() => { void entries.refetch(); void activities.refetch(); void workouts.refetch() }}>Retry</Button>
               </div>
             )}
-            <CalendarView date={date} today={today} onDateChange={clearSelection} items={items}
+            <CalendarView date={date} today={today} defaultView={search.get("view") === "month" ? "month" : "week"} onDateChange={clearSelection} items={items}
               onAdd={() => { setFeedback(null); setEditor({ scope: "create", initial: newActivity() }) }}
               onMove={(id, next) => {
                 const occurrence = occurrences.find((item) => activityKey(item) === id)
