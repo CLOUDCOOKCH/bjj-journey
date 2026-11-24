@@ -17,7 +17,6 @@ import {
   Notebook,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useSession } from "next-auth/react"
@@ -138,7 +137,6 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -171,12 +169,6 @@ export default function SignUpPage() {
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
-      setIsLoading(false)
-      return
-    }
-
-    if (!agreeToTerms) {
-      setError("You must agree to the Terms of Service")
       setIsLoading(false)
       return
     }
@@ -417,28 +409,6 @@ export default function SignUpPage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 py-2">
-              <div className="flex items-center h-5">
-                <Checkbox
-                  id="terms"
-                  checked={agreeToTerms}
-                  onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
-                  className="data-[state=checked]:bg-[#2dd4bf] data-[state=checked]:border-[#2dd4bf] data-[state=checked]:text-black"
-                />
-              </div>
-              <label htmlFor="terms" className="text-sm text-slate-400 leading-relaxed">
-                I agree to the{" "}
-                <Link href="/terms" className="text-[#2dd4bf] hover:text-[#2dd4bf]/80 transition-colors underline underline-offset-4">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="text-[#2dd4bf] hover:text-[#2dd4bf]/80 transition-colors underline underline-offset-4">
-                  Privacy Policy
-                </Link>
-                .
-              </label>
-            </div>
-
             {error && (
               <p className="text-sm text-red-400 bg-red-950/30 p-3 rounded-lg border border-red-900/50">
                 {error}
@@ -469,17 +439,6 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-8 text-[10px] text-slate-600 uppercase tracking-widest font-medium">
-          <Link href="/terms" className="hover:text-slate-400">
-            Terms
-          </Link>
-          <Link href="/privacy" className="hover:text-slate-400">
-            Privacy Policy
-          </Link>
-          <Link href="/support" className="hover:text-slate-400">
-            Support
-          </Link>
-        </div>
       </section>
     </div>
   )

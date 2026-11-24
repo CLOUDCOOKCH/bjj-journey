@@ -3,7 +3,7 @@
 import type { FormEvent } from "react"
 import { useEffect, useState } from "react"
 
-import { signIn, useSession } from "next-auth/react"
+import { getSession, signIn, useSession } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -99,10 +99,15 @@ export default function LoginPage() {
         redirect: false,
       })
 
-      if (result?.error) {
+      if (result?.error === "CredentialsSignin") {
         setError("Invalid email or password")
+      } else if (!result?.ok || result.error) {
+        setError("Sign-in failed. Open the address configured for this installation and try again.")
+      } else if (!(await getSession())?.user) {
+        setError("Your browser did not keep the session. Check the site address and allow cookies, then try again.")
       } else {
-        router.push("/dashboard")
+        router.replace("/dashboard")
+        router.refresh()
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
@@ -297,16 +302,10 @@ export default function LoginPage() {
                   Remember me
                 </span>
               </label>
-              <Link
-                href="/auth/forgot-password"
-                className="text-[#2dd4bf] hover:text-[#2dd4bf]/80 font-medium transition-colors"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             {error && (
-              <p className="text-sm text-red-400 bg-red-950/30 p-3 rounded-lg border border-red-900/50">
+              <p role="alert" className="text-sm text-red-400 bg-red-950/30 p-3 rounded-lg border border-red-900/50">
                 {error}
               </p>
             )}
@@ -335,17 +334,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-8 text-[10px] text-slate-600 uppercase tracking-widest font-medium">
-          <Link href="/terms" className="hover:text-slate-400">
-            Terms
-          </Link>
-          <Link href="/privacy" className="hover:text-slate-400">
-            Privacy Policy
-          </Link>
-          <Link href="/support" className="hover:text-slate-400">
-            Support
-          </Link>
-        </div>
       </section>
     </div>
   )

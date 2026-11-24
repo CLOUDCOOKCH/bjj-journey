@@ -49,6 +49,10 @@ The `2.0-nas` tag is the earlier multi-container image. For current single-conta
 2. In your existing Cloudflare Tunnel, add a published application route for that hostname. Set the service to `http://127.0.0.1:3000`, or substitute your `APP_PORT`. This origin is for a connector running directly on the same host.
 3. Open the HTTPS address in a browser, authenticate with an allowed identity and create or sign in to a BJJ Journey account. In a separate browser profile, verify that an unapproved identity cannot reach the app. Use the configured HTTPS address for normal sign-in so NextAuth uses the expected origin and secure cookies.
 
+## Sign in at the configured address
+
+If `NEXTAUTH_URL` is set to your Cloudflare HTTPS address, use that address for account creation and sign-in. If you are testing only over your LAN and have no working tunnel yet, set `NEXTAUTH_URL` to your exact NAS address, such as `http://192.168.1.20:3000`, then recreate the container with its existing database volume. Use the same value as the address in the browser. Switching the URL can require a new sign-in.
+
 ## Update and recover
 
 Back up the database before updating. For an upgrade, stop the app, rebuild and run initialisation explicitly, then start the updated app once initialisation succeeds:
