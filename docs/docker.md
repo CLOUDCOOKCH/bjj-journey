@@ -2,6 +2,21 @@
 
 Run the Compose stack on the same host as your existing `cloudflared` connector. The stack uses PostgreSQL 17 with a named volume, so container restarts preserve accounts and training history.
 
+## Single-container NAS deployment
+
+On a 64-bit Intel or AMD NAS, use `compose.single.yaml` to run the app and PostgreSQL in one container. PostgreSQL uses a private Unix socket inside the container. The named volume `bjj-data` stores the database. This setup needs `NEXTAUTH_URL` and `NEXTAUTH_SECRET` in `.env.docker`.
+
+For private packages, first run `docker login ghcr.io -u YOUR_GITHUB_USERNAME` using a classic GitHub token with `read:packages`. Then pull and start the image:
+
+```sh
+docker compose --env-file .env.docker -f compose.single.yaml pull
+docker compose --env-file .env.docker -f compose.single.yaml up -d --wait
+```
+
+The **Publish single-container NAS app to GHCR** workflow publishes `ghcr.io/cloudcookch/bjj-journey:2.0-single`. The app starts once database migrations and catalog seeding succeed. The host-level Cloudflare Tunnel still points at `http://127.0.0.1:3000`.
+
+The single-container stack starts with a fresh volume. If you already have training data in the three-container stack, back up the old database and keep its volume until you have verified a migration. The multi-container instructions below remain available for those installations.
+
 ## Configure and start
 
 1. Copy `.env.docker.example` to `.env.docker` and restrict access with `chmod 600 .env.docker`.
@@ -26,7 +41,7 @@ docker compose --env-file .env.docker pull
 docker compose --env-file .env.docker up -d --wait
 ```
 
-The **Publish NAS images to GHCR** workflow publishes the app and initializer after the smoke test passes. Run the same commands to pick up new images at the `2.0-nas` tag.
+The `2.0-nas` tag is the earlier multi-container image. For current single-container builds use `compose.single.yaml`.
 
 ## Route access through Cloudflare
 

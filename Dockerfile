@@ -26,3 +26,17 @@ COPY --from=builder --chown=node:node /app/public ./public
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
+
+FROM postgres:17-bookworm AS single
+WORKDIR /app
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000 \
+    PGDATA=/var/lib/postgresql/data/pgdata PGHOST=/run/bjj-postgres \
+    PGUSER=postgres PGDATABASE=bjj_journey DB_DRIVER=postgres
+COPY --from=dependencies /usr/local/bin/node /usr/local/bin/node
+COPY --from=app --chown=postgres:postgres /app/ /app/
+COPY --from=init --chown=postgres:postgres /app/ /opt/bjj-init/
+COPY --chmod=0755 scripts/start-single-container.sh /usr/local/bin/start-bjj
+# The inherited PostgreSQL port metadata does not publish a host port.
+EXPOSE 3000
+ENTRYPOINT ["/usr/local/bin/start-bjj"]
+CMD ["node", "server.js"]

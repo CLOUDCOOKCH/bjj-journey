@@ -94,7 +94,7 @@ BJJ Journey is a full-stack web app for tracking your Brazilian Jiu Jitsu traini
 
 ### Docker self-hosting
 
-On Intel/AMD NAS hosts, use `compose.ghcr.yaml` to pull the prebuilt app and initializer from GitHub Container Registry. See the Docker guide for configuration and registry sign-in.
+On Intel/AMD NAS hosts, use `compose.single.yaml` to pull one image with the app and PostgreSQL from GitHub Container Registry. See the Docker guide for configuration, registry sign-in and data migration.
 
 Use [Docker Compose with PostgreSQL and Cloudflare Tunnel](docs/docker.md) to run BJJ Journey on your own host.
 

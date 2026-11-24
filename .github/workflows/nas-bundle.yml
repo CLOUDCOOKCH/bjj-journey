@@ -1,4 +1,4 @@
-name: Publish NAS images to GHCR
+name: Publish single-container NAS app to GHCR
 
 on:
   workflow_dispatch:
@@ -17,22 +17,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Linux AMD64 images
+      - name: Build single-container Linux AMD64 image
         run: |
-          docker build --platform linux/amd64 --target app --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$GITHUB_SHA" -t ghcr.io/cloudcookch/bjj-journey:2.0-nas .
-          docker build --platform linux/amd64 --target init --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$GITHUB_SHA" -t ghcr.io/cloudcookch/bjj-journey-init:2.0-nas .
-          docker pull --platform linux/amd64 postgres:17
+          docker build --platform linux/amd64 --target single \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t ghcr.io/cloudcookch/bjj-journey:2.0-single .
 
-      - name: Smoke test the NAS Compose stack
+      - name: Smoke test the single-container NAS app
         shell: bash
         run: |
           staging=$(mktemp -d)
-          cp compose.ghcr.yaml "$staging/compose.yaml"
+          cp compose.single.yaml "$staging/compose.yaml"
           cd "$staging"
           umask 077
           {
             printf 'NEXTAUTH_URL=http://127.0.0.1:3190\nAPP_PORT=3190\n'
-            printf 'NEXTAUTH_SECRET=%s\nPOSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 32)" "$(openssl rand -hex 32)"
+            printf 'NEXTAUTH_SECRET=%s\n' "$(openssl rand -hex 32)"
           } > .env.docker
           cleanup() {
             docker compose --env-file .env.docker down --volumes
@@ -42,7 +43,7 @@ jobs:
           docker compose --env-file .env.docker up -d --pull never --wait --wait-timeout 120
           curl --fail --silent --show-error http://127.0.0.1:3190/api/auth/session |
             jq --exit-status '. == {}'
-          count=$(docker compose --env-file .env.docker exec -T db psql -U bjj_journey -d bjj_journey -Atc 'SELECT count(*) FROM training_exercise_catalog')
+          count=$(docker compose --env-file .env.docker exec -T -u postgres app psql -Atc 'SELECT count(*) FROM training_exercise_catalog')
           test "$count" -ge 135
 
       - name: Sign in to GHCR
@@ -52,7 +53,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish tested images
-        run: |
-          docker push ghcr.io/cloudcookch/bjj-journey-init:2.0-nas
-          docker push ghcr.io/cloudcookch/bjj-journey:2.0-nas
+      - name: Publish tested image
+        run: docker push ghcr.io/cloudcookch/bjj-journey:2.0-single
