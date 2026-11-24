@@ -1,69 +1,25 @@
-"use client"
-
-import { Card } from "@/components/ui/card"
-
 interface MonthlyChartProps {
-  data: {
-    month: string
-    sessions: number
-  }[]
+  data: { month: string; sessions: number }[]
 }
 
 export function MonthlyChart({ data }: MonthlyChartProps) {
-  const maxSessions = Math.max(...data.map((d) => d.sessions), 1)
-  const currentIndex = data.length - 1 // Last item is current month
-
+  const maxSessions = Math.max(...data.map(({ sessions }) => sessions), 1)
   return (
-    <section className="animate-in fade-in slide-in-from-left-8 duration-700 delay-300">
-      <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Training Volume</h2>
-      <Card className="border-border/50 bg-card/40 backdrop-blur-md p-6 rounded-2xl h-[300px] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <span className="text-xs font-semibold text-muted-foreground uppercase">Past 6 Months</span>
-          <span className="text-xs font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full">Consistent</span>
-        </div>
-
-        {/* Bar Chart */}
-        <div className="flex-1 flex items-end justify-between gap-2">
-          {data.map((item, index) => {
-            const height = (item.sessions / maxSessions) * 100
-            const isCurrentMonth = index === currentIndex
-
-            return (
-              <div
-                key={item.month}
-                className={`
-                  flex-1 rounded-t-lg relative group transition-all duration-300
-                  ${isCurrentMonth ? "bg-primary/20 ring-1 ring-inset ring-primary/40 hover:bg-primary/30" : "bg-muted hover:bg-primary/20"}
-                `}
-                style={{ height: `${height}%` }}
-              >
-                {/* Tooltip - visible on hover */}
-                <span
-                  className={`
-                    absolute -top-6 left-1/2 -translate-x-1/2
-                    text-[10px] font-bold transition-opacity
-                    ${isCurrentMonth ? "opacity-100 text-primary" : "opacity-0 group-hover:opacity-100"}
-                  `}
-                >
-                  {item.sessions}
-                </span>
-
-                {/* Month label */}
-                <span
-                  className={`
-                    absolute -bottom-6 left-1/2 -translate-x-1/2
-                    text-[10px] font-medium uppercase
-                    ${isCurrentMonth ? "text-primary font-bold" : "text-muted-foreground"}
-                  `}
-                >
-                  {item.month}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </Card>
+    <section className="min-w-0 rounded-xl border bg-card p-4" aria-labelledby="monthly-chart-title">
+      <h2 id="monthly-chart-title" className="font-semibold">Mat sessions by month</h2>
+      {data.some(({ sessions }) => sessions > 0)
+        ? <ul className="mt-4 grid grid-cols-6 gap-1.5 sm:gap-2">
+          {data.map(({ month, sessions }, index) => (
+            <li key={month} className="flex min-w-0 flex-col items-center gap-1 text-xs tabular-nums">
+              <span className="font-semibold">{sessions}</span>
+              <span className="flex h-24 w-full items-end rounded bg-muted/40" aria-hidden="true">
+                <span className={`w-full rounded-t ${index === data.length - 1 ? "bg-primary" : "bg-primary/55"}`} style={{ height: `${100 * sessions / maxSessions}%` }} />
+              </span>
+              <span className="truncate text-muted-foreground">{month}</span>
+            </li>
+          ))}
+        </ul>
+        : <p className="mt-2 text-sm text-muted-foreground">Log mat sessions to see your monthly training history.</p>}
     </section>
   )
 }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 262" role="img" aria-labelledby="title desc">
+  <title id="title">Basic jump rope</title>
+  <desc id="desc">Position cue for Basic jump rope. Keep the hops low</desc>
+  <rect width="320" height="262" rx="20" fill="#f4f5f8"/>
+  <path d="M56 208h208" stroke="#acb3c2" stroke-width="2" stroke-dasharray="4 6"/>
+  <text x="20" y="28" fill="#b64617" font-family="sans-serif" font-size="11" font-weight="700" letter-spacing="1.8">CONDITIONING</text>
+  <g fill="none" stroke="#919aab" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  </g>
+  <g fill="none" stroke="#233049" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="153" cy="81" r="12"/>
+    <path d="M162 104 L171 145 M171 145 L134 161 L100 182 M171 145 L196 157 L215 172 M162 104 L138 81 L111 52 M162 104 L184 122 L204 144"/>
+  </g>
+  <g fill="#b64617">
+    <circle cx="162" cy="104" r="5"/>
+    <circle cx="171" cy="145" r="5"/>
+  </g>
+  <path d="M20 220h280" stroke="#d3d8e1"/>
+  <text x="20" y="244" fill="#233049" font-family="sans-serif" font-size="13" font-weight="700">Keep the hops low</text>
+</svg>

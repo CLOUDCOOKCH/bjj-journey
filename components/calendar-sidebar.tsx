@@ -1,76 +1,85 @@
-import { Card } from '@/components/ui/card'
-import { Flame, Clock, Plus } from 'lucide-react'
-import { JournalEntry } from '@/lib/db/schema'
-import { calculateCalendarStats, getSessionTypeColor, getSessionTypeLabel } from '@/lib/utils/calendar-stats'
+import Link from "next/link"
+import { Bell, CalendarPlus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CategoryDot } from "@/components/calendar-view"
+import { activityCategories, activityLabels, addCalendarDays, getDueReminders, getUpcomingReminders, getOccurrences, journalCategory, type ActivityCategory, type PlannedActivity, type TrainingRecord } from "@/lib/training/planner"
+import type { JournalEntry } from "@/lib/db/schema"
 
-interface CalendarSidebarProps {
+interface Props {
+  records: TrainingRecord<PlannedActivity>[]
   entries: JournalEntry[]
-  monthlyGoal: number
-  onAddPastSession: () => void
+  workouts: { category: ActivityCategory; date: string }[]
+  weekStart: string
+  now: Date
+  timeZone: string
+  pending: boolean
+  weeklyTargets: { id: string; label: string; progress: number; target: number }[]
+  copyPreviousWeek: () => void
+  onSelectDate: (date: string) => void
 }
 
-export function CalendarSidebar({ entries, monthlyGoal, onAddPastSession }: CalendarSidebarProps) {
-  const stats = calculateCalendarStats(entries, monthlyGoal)
-
-  const sessionTypes = ['regular', 'competition', 'open_mat'] as const
+export function CalendarSidebar({ records, entries, workouts, weekStart, now, timeZone, pending, weeklyTargets, copyPreviousWeek, onSelectDate }: Props) {
+  const weekEnd = addCalendarDays(weekStart, 6)
+  const occurrences = getOccurrences(records, weekStart, weekEnd)
+  const linked = new Set(records.map(({ data }) => data.journalEntryId).filter(Boolean))
+  const logged = entries.filter((entry) => entry.entryDate >= weekStart && entry.entryDate <= weekEnd && !linked.has(entry.id))
+  const countedMat = logged.filter(({ sessionType }) => ["gi", "no_gi", "open_mat", "competition"].includes(sessionType))
+  const otherMat = logged.length - countedMat.length
+  const independentWorkouts = workouts.filter(({ date }) => date >= weekStart && date <= weekEnd)
+  const due = getDueReminders(records, now, timeZone)
+  const upcoming = getUpcomingReminders(records, now, timeZone).filter(({ record, date }) => !due.some((item) => item.record.id === record.id && item.date === date))
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-700 delay-200">
-      <Card className="glass-card border-slate-800/60 bg-slate-900/40 backdrop-blur-sm p-6 rounded-3xl">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center">
-            <Flame className="h-5 w-5 text-teal-400" />
-          </div>
-          <div>
-            <h3 className="font-bold uppercase tracking-widest text-slate-400 text-xs">Current Streak</h3>
-            <p className="text-2xl font-bold text-slate-100">{stats.currentStreak} Days</p>
-          </div>
+    <aside className="space-y-4 self-start">
+      <section className="rounded-xl border bg-card p-4">
+        <h2 className="text-sm font-semibold">Weekly activity</h2>
+        <p className="mt-1 text-xs text-muted-foreground">Completed / scheduled</p>
+        <ul className="mt-2 divide-y">
+          {activityCategories.map((category) => {
+            const scheduled = occurrences.filter(({ record }) => record.data.category === category && record.data.status !== "cancelled")
+            const completed = scheduled.filter(({ record }) => record.data.status === "completed").length
+              + countedMat.filter((entry) => journalCategory(entry.sessionType) === category).length
+              + independentWorkouts.filter((workout) => workout.category === category).length
+            if (!scheduled.length && !completed) return null
+            return <li key={category} className="flex items-center gap-2 py-2 text-sm">
+              <CategoryDot category={category} /><span className="flex-1">{activityLabels[category]}</span>
+              <span className="tabular-nums font-medium">{completed} / {scheduled.length}</span>
+            </li>
+          })}
+          {otherMat > 0 && <li className="flex items-center justify-between gap-2 py-2 text-sm"><span>Other mat sessions</span><span className="tabular-nums font-medium">{otherMat} / 0</span></li>}
+          {!occurrences.some(({ record }) => record.data.status !== "cancelled") && !logged.length && !independentWorkouts.length && <li className="py-2 text-sm text-muted-foreground">Schedule your mat sessions, workouts and rest days.</li>}
+        </ul>
+        <Button variant="outline" className="mt-3 w-full" disabled={pending} onClick={copyPreviousWeek}><CalendarPlus /> Copy previous week</Button>
+      </section>
+      <section className="rounded-xl border bg-card p-4" aria-label="Weekly targets">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">Weekly targets</h2>
+          <Link className="rounded text-xs font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-ring" href="/progress">Manage goals</Link>
         </div>
-
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/50">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sessions This Month</span>
-            <div className="flex items-end justify-between mt-1">
-              <span className="text-xl font-bold text-slate-200">{stats.sessionsThisMonth}</span>
-              <span className="text-xs font-semibold text-teal-400">Goal: {stats.monthlyGoal}</span>
-            </div>
-            <div className="mt-3 h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-teal-500 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.4)] transition-all duration-500"
-                style={{ width: `${stats.monthlyProgress}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/50">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mat Time</span>
-            <div className="flex items-center gap-2 mt-1">
-              <Clock className="h-4 w-4 text-slate-400" />
-              <p className="text-xl font-bold text-slate-200">{stats.totalMatTime}</p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="glass-card border-slate-800/60 bg-slate-900/40 backdrop-blur-sm p-6 rounded-3xl">
-        <h4 className="font-bold uppercase tracking-widest text-slate-500 text-sm mb-4">Legend</h4>
-        <div className="space-y-3">
-          {sessionTypes.map((type) => (
-            <div key={type} className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${getSessionTypeColor(type)}`} />
-              <span className="text-xs font-medium text-slate-300">{getSessionTypeLabel(type)}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <button
-        onClick={onAddPastSession}
-        className="w-full flex items-center justify-center gap-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-4 rounded-2xl transition-all shadow-lg shadow-teal-500/10 active:scale-95 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
-      >
-        <Plus className="h-5 w-5" />
-        <span>Add Past Session</span>
-      </button>
-    </div>
+        {weeklyTargets.length ? <ul className="mt-2 divide-y">{weeklyTargets.map(({ id, label, progress, target }) => (
+          <li key={id} className="py-2">
+            <div className="flex justify-between gap-2 text-sm"><span>{label}</span><span className="tabular-nums">{progress} / {target}</span></div>
+            <progress className="mt-1 h-1.5 w-full accent-primary" aria-label={label} max={target} value={Math.min(progress, target)} />
+          </li>
+        ))}</ul> : <p className="mt-2 text-sm text-muted-foreground">Add a weekly goal to track it here.</p>}
+      </section>
+      <section className="rounded-xl border bg-card p-4" aria-live="polite">
+        <h2 className="flex items-center gap-2 text-sm font-semibold"><Bell className="size-4" /> Session reminders</h2>
+        {due.length ? <ul className="mt-2 divide-y">{due.map(({ record, date }) => <li key={`${record.id}:${date}`}>
+          <button type="button" className="min-h-11 w-full rounded text-left text-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-ring" onClick={() => onSelectDate(date)}>
+            <span className="font-medium">{record.data.title}</span><span className="block text-xs text-muted-foreground">{record.data.time} {record.data.timeZone}</span>
+          </button>
+        </li>)}</ul> : <p className="mt-2 text-sm text-muted-foreground">No reminders are due.{!upcoming.length && " Set a reminder when scheduling a timed activity."}</p>}
+        {!!upcoming.length && <>
+          <h3 className="mt-3 text-xs font-medium text-muted-foreground">Upcoming this week</h3>
+          <ul className="mt-1 divide-y">{upcoming.slice(0, 4).map(({ record, date, reminder }) => <li key={`${record.id}:${date}`}>
+            <button type="button" className="min-h-11 w-full rounded py-1 text-left text-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-ring" onClick={() => onSelectDate(date)}>
+              <span className="font-medium">{record.data.title}</span>
+              <span className="block text-xs text-muted-foreground">{new Intl.DateTimeFormat(undefined, { timeZone, dateStyle: "medium", timeStyle: "short" }).format(new Date(reminder))}</span>
+            </button>
+          </li>)}</ul>
+        </>}
+      </section>
+    </aside>
   )
 }

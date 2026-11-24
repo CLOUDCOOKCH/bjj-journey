@@ -29,7 +29,7 @@ jest.mock('next-auth/react', () => ({
   signOut: jest.fn(),
 }))
 
-global.Response = class Response {
+class TestResponse {
   constructor(body, init = {}) {
     this.body = body
     this.status = init.status || 200
@@ -37,7 +37,7 @@ global.Response = class Response {
   }
 
   static json(data, init = {}) {
-    const response = new Response(JSON.stringify(data), {
+    const response = new TestResponse(JSON.stringify(data), {
       ...init,
       headers: {
         'Content-Type': 'application/json',
@@ -59,6 +59,8 @@ global.Response = class Response {
     this._headers = value
   }
 }
+
+global.Response ??= TestResponse
 
 class Headers {
   constructor(init = {}) {

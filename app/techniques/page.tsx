@@ -7,17 +7,17 @@ import { MobileBottomNav } from '@/components/navigation/mobile-bottom-nav'
 import { useReviewTechniques, useUpdateReviewTechnique } from '@/lib/hooks'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { TechniqueFilters } from '@/components/review-techniques/technique-filters'
 import { TechniqueCategories } from '@/components/review-techniques/technique-categories'
 import { TechniqueReviewGrid } from '@/components/review-techniques/technique-review-grid'
-import type { ReviewTechniquesFilters } from '@/lib/hooks'
+import type { ReviewTechniqueWithVideos, ReviewTechniquesFilters } from '@/lib/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { reviewTechniqueKeys } from '@/lib/hooks/use-review-techniques'
 import { PageHeader } from '@/components/page-header'
 
 export default function TechniquesPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const isAuthenticated = status === 'authenticated'
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -28,6 +28,10 @@ export default function TechniquesPage() {
     search: '',
     sort: 'recent',
   })
+
+  const handleSearchChange = useCallback((search: string) => {
+    setFilters((prev) => ({ ...prev, search: search || undefined }))
+  }, [])
 
   const { data: techniques, isLoading, error } = useReviewTechniques(filters)
 
@@ -57,10 +61,6 @@ export default function TechniquesPage() {
     return null
   }
 
-  const handleSearchChange = (search: string) => {
-    setFilters((prev) => ({ ...prev, search: search || undefined }))
-  }
-
   const handleCategoryChange = (category: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -75,7 +75,7 @@ export default function TechniquesPage() {
     }))
   }
 
-  const handleEdit = (technique: any) => {
+  const handleEdit = (technique: ReviewTechniqueWithVideos) => {
     router.push(`/techniques/manage?id=${technique.id}`)
   }
 

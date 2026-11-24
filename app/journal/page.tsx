@@ -112,7 +112,7 @@ export default function JournalPage() {
     },
   })
 
-  const allEntries = useMemo(() => data?.pages.flatMap((page: any) => page.entries) || [], [data])
+  const allEntries = useMemo(() => data?.pages.flatMap((page) => page.entries) || [], [data])
   const totalEntries = useMemo(() => data?.pages[0]?.total || 0, [data])
 
   const filteredEntries = useMemo(() => {
@@ -197,6 +197,8 @@ export default function JournalPage() {
           title="Journal"
           subtitle="Your complete training history & progress logs"
           actions={
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline"><Link href="/journal/reflections">Weekly reflection</Link></Button>
             <Button asChild className="rounded-full shadow-lg shadow-primary/10 w-full sm:w-auto justify-center">
               <Link href="/start-training">
                 <BookOpen className="h-4 w-4 mr-2" />
@@ -204,6 +206,7 @@ export default function JournalPage() {
                 <span className="sm:hidden">New</span>
               </Link>
             </Button>
+            </div>
           }
         />
         <div className="container mx-auto px-4 lg:px-8 py-8 space-y-8">
@@ -419,6 +422,11 @@ export default function JournalPage() {
                               </div>
                             </div>
                           </Link>
+                          <div className="border-t border-border px-4 py-2">
+                            <Button asChild variant="ghost">
+                              <Link href={`/journal/${entry.id}/details`}>Session reflection</Link>
+                            </Button>
+                          </div>
 
                           <div className="hidden lg:flex absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity items-center gap-2">
                             <Button

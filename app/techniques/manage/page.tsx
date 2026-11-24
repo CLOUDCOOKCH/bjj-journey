@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,8 +14,10 @@ import {
     useUpdateReviewTechnique,
     useReviewTechnique,
     useDeleteReviewTechnique,
-    reviewTechniqueKeys
+    reviewTechniqueKeys,
+    type ReviewTechniqueWithVideos,
 } from '@/lib/hooks/use-review-techniques'
+import { reviewTechniqueSchema } from '@/lib/validations/schema'
 import { PageHeader } from '@/components/page-header'
 import { SidebarNav } from '@/components/navigation/sidebar-nav'
 import { MobileBottomNav } from '@/components/navigation/mobile-bottom-nav'
@@ -42,24 +44,35 @@ interface Video {
     title?: string
 }
 
-function TechniqueManageForm() {
+function TechniqueManageContent() {
+    const techniqueId = useSearchParams().get('id')
+    const { data: technique, isLoading } = useReviewTechnique(techniqueId || '')
+
+    if (techniqueId && isLoading) return <PageSkeleton />
+    if (techniqueId && !technique) {
+        return <p role="alert" className="py-20 text-center text-muted-foreground">Unable to load this technique.</p>
+    }
+
+    return <TechniqueManageForm key={techniqueId ?? 'new'} technique={technique} />
+}
+
+function TechniqueManageForm({ technique }: { technique?: ReviewTechniqueWithVideos }) {
     const router = useRouter()
-    const searchParams = useSearchParams()
-    const techniqueId = searchParams.get('id')
     const queryClient = useQueryClient()
+    const techniqueId = technique?.id
 
-    const [name, setName] = useState('')
-    const [description, setDescription] = useState('')
-    const [notes, setNotes] = useState('')
-    const [category, setCategory] = useState('')
-    const [beltLevel, setBeltLevel] = useState('')
-    const [difficulty, setDifficulty] = useState('')
-    const [trainingType, setTrainingType] = useState('')
-    const [videos, setVideos] = useState<Video[]>([{ youtubeUrl: '' }])
+    const [name, setName] = useState(technique?.name ?? '')
+    const [description, setDescription] = useState(technique?.description ?? '')
+    const [notes, setNotes] = useState(technique?.notes ?? '')
+    const [category, setCategory] = useState(technique?.category ?? '')
+    const [beltLevel, setBeltLevel] = useState(technique?.beltLevel ?? '')
+    const [difficulty, setDifficulty] = useState(technique?.difficulty ?? '')
+    const [trainingType, setTrainingType] = useState(technique?.trainingType ?? '')
+    const [videos, setVideos] = useState<Video[]>(() => technique?.videos.length
+        ? technique.videos.map((video) => ({ youtubeUrl: video.youtubeUrl, title: video.title ?? '' }))
+        : [{ youtubeUrl: '' }])
+    const [validationError, setValidationError] = useState<string | null>(null)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
-    // Fetch technique if in edit mode
-    const { data: technique, isLoading: isFetching } = useReviewTechnique(techniqueId || '')
 
     const createTechnique = useCreateReviewTechnique({
         onSuccess: () => {
@@ -82,23 +95,6 @@ function TechniqueManageForm() {
         },
     })
 
-    useEffect(() => {
-        if (technique && techniqueId) {
-            setName(technique.name || '')
-            setDescription(technique.description || '')
-            setNotes(technique.notes || '')
-            setCategory(technique.category || '')
-            setBeltLevel(technique.beltLevel || '')
-            setDifficulty(technique.difficulty || '')
-            setTrainingType(technique.trainingType || '')
-            setVideos(
-                technique.videos?.length > 0
-                    ? technique.videos.map((v) => ({ youtubeUrl: v.youtubeUrl, title: v.title || '' }))
-                    : [{ youtubeUrl: '' }]
-            )
-        }
-    }, [technique, techniqueId])
-
     const addVideo = () => {
         setVideos([...videos, { youtubeUrl: '' }])
     }
@@ -120,21 +116,26 @@ function TechniqueManageForm() {
 
         const validVideos = videos.filter((v) => v.youtubeUrl.trim() !== '')
 
-        const data = {
+        const parsed = reviewTechniqueSchema.safeParse({
             name: name.trim(),
             description: description.trim() || undefined,
             notes: notes.trim() || undefined,
-            category: (category || undefined) as any, // Cast to match stricter type
-            beltLevel: (beltLevel || undefined) as any,
-            difficulty: (difficulty || undefined) as any,
-            trainingType: (trainingType || undefined) as any,
-            videos: validVideos.length > 0 ? validVideos : undefined,
+            category: category || undefined,
+            beltLevel: beltLevel || undefined,
+            difficulty: difficulty || undefined,
+            trainingType: trainingType || undefined,
+            videos: validVideos,
+        })
+        if (!parsed.success) {
+            setValidationError(parsed.error.issues[0]?.message ?? 'Check the technique details.')
+            return
         }
 
+        setValidationError(null)
         if (techniqueId) {
-            updateTechnique.mutate({ id: techniqueId, data })
+            updateTechnique.mutate({ id: techniqueId, data: parsed.data })
         } else {
-            createTechnique.mutate(data)
+            createTechnique.mutate(parsed.data)
         }
     }
 
@@ -144,10 +145,7 @@ function TechniqueManageForm() {
     }
 
     const isPending = createTechnique.isPending || updateTechnique.isPending || deleteTechnique.isPending
-
-    if (techniqueId && isFetching) {
-        return <div className="text-center py-20 text-muted-foreground">Loading technique...</div>
-    }
+    const errorMessage = validationError ?? updateTechnique.error?.message ?? createTechnique.error?.message ?? deleteTechnique.error?.message
 
     return (
         <>
@@ -364,6 +362,7 @@ function TechniqueManageForm() {
                         </div>
                     </section>
 
+                    {errorMessage && <p role="alert" className="text-destructive">{errorMessage}</p>}
                     <div className="flex flex-col sm:flex-row gap-4 pt-4">
                         <Button
                             onClick={handleSubmit}
@@ -404,7 +403,7 @@ export default function TechniqueManagePage() {
             <MobileBottomNav />
             <main className="lg:ml-64 pb-20 lg:pb-8">
                 <Suspense fallback={<PageSkeleton />}>
-                    <TechniqueManageForm />
+                    <TechniqueManageContent />
                 </Suspense>
             </main>
         </div>

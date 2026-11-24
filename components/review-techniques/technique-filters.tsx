@@ -3,7 +3,7 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 interface TechniqueFiltersProps {
@@ -18,26 +18,10 @@ export function TechniqueFilters({
   selectedTrainingType = 'all',
 }: TechniqueFiltersProps) {
   const [searchValue, setSearchValue] = useState('')
-  const timeoutRef = useRef<NodeJS.Timeout>()
-
   useEffect(() => {
-    // Clear previous timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-
-    // Set new timeout
-    timeoutRef.current = setTimeout(() => {
-      onSearchChange(searchValue)
-    }, 300)
-
-    // Cleanup
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [searchValue])
+    const timeout = setTimeout(() => onSearchChange(searchValue), 300)
+    return () => clearTimeout(timeout)
+  }, [onSearchChange, searchValue])
 
   return (
     <div className="flex flex-col lg:flex-row gap-4">

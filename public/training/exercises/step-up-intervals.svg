@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 262" role="img" aria-labelledby="title desc">
+  <title id="title">Low step-up intervals</title>
+  <desc id="desc">Position cue for Low step-up intervals. Place the full foot</desc>
+  <rect width="320" height="262" rx="20" fill="#f4f5f8"/>
+  <path d="M56 208h208" stroke="#acb3c2" stroke-width="2" stroke-dasharray="4 6"/>
+  <text x="20" y="28" fill="#b64617" font-family="sans-serif" font-size="11" font-weight="700" letter-spacing="1.8">CONDITIONING</text>
+  <g fill="none" stroke="#919aab" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M88 187h61v23h-61z"/>
+  </g>
+  <g fill="none" stroke="#233049" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="155" cy="79" r="12"/>
+    <path d="M163 101 L172 148 M172 148 L143 163 L119 183 M172 148 L202 173 L226 205 M163 101 L137 121 L111 139 M163 101 L189 126 L210 152"/>
+  </g>
+  <g fill="#b64617">
+    <circle cx="163" cy="101" r="5"/>
+    <circle cx="172" cy="148" r="5"/>
+  </g>
+  <path d="M20 220h280" stroke="#d3d8e1"/>
+  <text x="20" y="244" fill="#233049" font-family="sans-serif" font-size="13" font-weight="700">Place the full foot</text>
+</svg>

@@ -42,7 +42,6 @@ export async function PATCH(
     const user = await requireAuth()
     const { id } = await params
     const body = await request.json()
-    console.log('PATCH journal entry ID:', id, 'user:', user.id)
     const data = journalEntryUpdateSchema.parse(body)
 
     const updated = await db.update(journalEntries)
@@ -59,7 +58,6 @@ export async function PATCH(
       .returning()
 
     if (!updated[0]) {
-      console.log('Entry not found for ID:', id, 'user:', user.id)
       throw new ApiError(404, 'Entry not found')
     }
 

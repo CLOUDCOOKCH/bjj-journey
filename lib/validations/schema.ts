@@ -54,6 +54,7 @@ export const journalEntrySchema = z.object({
   title: z.string().max(200, 'Title too long').optional(),
   focusAreas: z.string().max(500, 'Focus areas too long').optional(),
   intensityLevel: z.number().int().min(1).max(5).optional(),
+  sessionRpe: z.number().int().min(0).max(10).nullable().optional(),
   durationMinutes: z.number().int().min(15).max(480).default(90),
   notes: z.string().nullable().optional(),
 })
@@ -63,6 +64,7 @@ export const journalEntryUpdateSchema = z.object({
   title: z.string().max(200).optional(),
   focusAreas: z.string().max(500).optional(),
   intensityLevel: z.number().int().min(1).max(5).optional(),
+  sessionRpe: z.number().int().min(0).max(10).nullable().optional(),
   durationMinutes: z.number().int().min(15).max(480).optional(),
   notes: z.string().nullable().optional(),
 })

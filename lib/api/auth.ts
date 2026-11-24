@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { ApiError } from '@/lib/api/errors'
 
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions)
@@ -12,7 +13,7 @@ export async function getCurrentUser() {
 export async function requireAuth() {
   const user = await getCurrentUser()
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new ApiError(401, 'Unauthorized')
   }
   return user
 }

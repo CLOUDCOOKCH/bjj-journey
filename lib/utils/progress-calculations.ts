@@ -2,7 +2,7 @@
  * Progress calculation utilities for belt progression tracking
  */
 
-import { JournalEntry } from '@/lib/db/schema'
+import type { JournalEntry } from '@/lib/db/schema'
 import { BeltRank, getNextBelt, TIME_REQUIREMENTS, calculateSessionsUntilNextStripe, parseBeltInfo } from '@/lib/constants/belt-progression'
 import type { Achievement } from '@/lib/db/schema'
 
@@ -20,7 +20,7 @@ export interface BeltProgressStats {
  */
 export function calculateBeltProgress(
   profile: { belt: string; stripes: number; currentBeltDate: string | null },
-  journalEntries: JournalEntry[],
+  journalEntries: Pick<JournalEntry, 'entryDate'>[],
   achievements: Achievement[] = []
 ): BeltProgressStats {
   const currentBelt = profile.belt as BeltRank

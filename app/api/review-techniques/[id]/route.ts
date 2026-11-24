@@ -54,7 +54,7 @@ export async function PATCH(
   try {
     const user = await requireAuth()
     const body = await request.json()
-    const data = reviewTechniqueUpdateSchema.parse(body)
+    const { videos, ...updateData } = reviewTechniqueUpdateSchema.parse(body)
     const { id } = await params
 
     // Verify ownership
@@ -66,30 +66,18 @@ export async function PATCH(
       throw new ApiError(403, 'Technique not found or access denied')
     }
 
-    // Filter out undefined values
-    const updateData: Record<string, any> = {}
-    if (data.name !== undefined) updateData.name = data.name
-    if (data.description !== undefined) updateData.description = data.description
-    if (data.category !== undefined) updateData.category = data.category
-    if (data.beltLevel !== undefined) updateData.beltLevel = data.beltLevel
-    if (data.difficulty !== undefined) updateData.difficulty = data.difficulty
-    if (data.trainingType !== undefined) updateData.trainingType = data.trainingType
-    if (data.notes !== undefined) updateData.notes = data.notes
-    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite
-
-    const updated = await db.update(reviewTechniques)
+    await db.update(reviewTechniques)
       .set({ ...updateData, updatedAt: new Date() })
       .where(eq(reviewTechniques.id, id))
-      .returning()
 
     // Handle videos update if provided
-    if (data.videos !== undefined) {
+    if (videos !== undefined) {
       // Delete existing videos
       await db.delete(reviewTechniqueVideos).where(eq(reviewTechniqueVideos.reviewTechniqueId, id))
 
       // Insert new videos if any
-      if (data.videos.length > 0) {
-        const videosToInsert = data.videos.map((video, index) => ({
+      if (videos.length > 0) {
+        const videosToInsert = videos.map((video, index) => ({
           reviewTechniqueId: id,
           youtubeUrl: video.youtubeUrl,
           title: video.title || null,

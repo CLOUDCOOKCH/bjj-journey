@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useQuery } from '@tanstack/react-query'
 import { calculateBeltProgress } from '@/lib/utils/progress-calculations'
 import type { BeltProgressStats } from '@/lib/utils/progress-calculations'
+import type { Achievement, JournalEntry } from '@/lib/db/schema'
 
 // ============================================================================
 // Query Keys
@@ -32,14 +33,11 @@ export interface ProgressData extends BeltProgressStats {
  */
 export function useProgressStats(
   profile: { belt: string; stripes: number; currentBeltDate: string | null } | undefined,
-  journalEntries: any[] | undefined,
-  _achievements: any[] | undefined,
+  journalEntries: JournalEntry[] | undefined,
+  achievements: Achievement[] | undefined,
   enabled?: boolean
 ) {
   const { status } = useSession()
-
-  // Need to ensure we have the array or empty array
-  const achievements = _achievements || []
 
   return useQuery<BeltProgressStats>({
     queryKey: progressKeys.stats(),
@@ -51,7 +49,7 @@ export function useProgressStats(
       return calculateBeltProgress(
         profile,
         journalEntries || [],
-        achievements
+        achievements ?? []
       )
     },
     enabled:

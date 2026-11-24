@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Award, Check } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCreateAchievement, achievementKeys } from "@/lib/hooks"
-import { BELT_COLORS, type BeltRank } from "@/lib/constants/belt-progression"
+import { BELT_COLORS, parseBeltInfo, type BeltRank } from "@/lib/constants/belt-progression"
 import type { Achievement } from "@/lib/db/schema"
 import { ButtonLoader } from "@/components/loading/button-loader"
 
@@ -20,13 +20,20 @@ interface AchievementDialogProps {
   existingAchievement?: Achievement
 }
 
-export function AchievementDialog({ isOpen, onClose, userId, existingAchievement }: AchievementDialogProps) {
-  const [type, setType] = useState<"belt" | "stripe">("belt")
-  const [selectedBelt, setSelectedBelt] = useState<BeltRank | null>(null)
-  const [stripeNumber, setStripeNumber] = useState<number>(1)
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [achievedDate, setAchievedDate] = useState("")
+export function AchievementDialog(props: AchievementDialogProps) {
+  return props.isOpen
+    ? <AchievementForm key={props.existingAchievement?.id ?? 'new'} {...props} />
+    : null
+}
+
+function AchievementForm({ onClose, existingAchievement }: AchievementDialogProps) {
+  const existingDetails = existingAchievement && parseBeltInfo(existingAchievement.title, existingAchievement.type)
+  const [type, setType] = useState<"belt" | "stripe">(existingAchievement?.type === "stripe" ? "stripe" : "belt")
+  const [selectedBelt, setSelectedBelt] = useState<BeltRank | null>(existingDetails?.belt ?? null)
+  const [stripeNumber, setStripeNumber] = useState(existingDetails?.stripe ?? 1)
+  const [title, setTitle] = useState(existingAchievement?.title ?? "")
+  const [description, setDescription] = useState(existingAchievement?.description ?? "")
+  const [achievedDate, setAchievedDate] = useState(() => existingAchievement?.achievedDate ?? new Date().toISOString().split('T')[0])
 
   const queryClient = useQueryClient()
   const createAchievement = useCreateAchievement({
@@ -35,47 +42,19 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
     },
   })
 
-  useEffect(() => {
-    if (existingAchievement) {
-      setType(existingAchievement.type as "belt" | "stripe")
-      setTitle(existingAchievement.title)
-      setDescription(existingAchievement.description || "")
-      setAchievedDate(existingAchievement.achievedDate)
+  function applySelection(nextType: "belt" | "stripe", belt: BeltRank | null, stripe: number) {
+    setType(nextType)
+    setSelectedBelt(belt)
+    setStripeNumber(stripe)
+    if (existingAchievement) return
 
-      // Try to extract belt/stripe info from title
-      if (existingAchievement.type === "belt") {
-        const belt = Object.keys(BELT_COLORS).find(b =>
-          existingAchievement.title.toLowerCase().includes(b)
-        ) as BeltRank | undefined
-        if (belt) setSelectedBelt(belt)
-      } else if (existingAchievement.type === "stripe") {
-        const match = existingAchievement.title.match(/(\d+)(?:st|nd|rd|th)?\s+stripe/i)
-        if (match) setStripeNumber(parseInt(match[1]))
-      }
-    } else {
-      setType("belt")
-      setSelectedBelt(null)
-      setStripeNumber(1)
-      setTitle("")
-      setDescription("")
-      // Default to today
-      const today = new Date()
-      const dateStr = today.toISOString().split('T')[0]
-      setAchievedDate(dateStr)
+    if (nextType === "belt" && belt) {
+      setTitle(`${BELT_COLORS[belt].name} Promotion`)
+    } else if (nextType === "stripe") {
+      const ordinal = ["1st", "2nd", "3rd", "4th"][stripe - 1]
+      setTitle(`${ordinal} Stripe Award`)
     }
-  }, [existingAchievement, isOpen])
-
-  // Auto-populate title when belt or stripe selection changes
-  useEffect(() => {
-    if (!existingAchievement) {
-      if (type === "belt" && selectedBelt) {
-        setTitle(`${BELT_COLORS[selectedBelt].name} Promotion`)
-      } else if (type === "stripe") {
-        const ordinal = stripeNumber === 1 ? "1st" : stripeNumber === 2 ? "2nd" : stripeNumber === 3 ? "3rd" : "4th"
-        setTitle(`${ordinal} Stripe Award`)
-      }
-    }
-  }, [type, selectedBelt, stripeNumber, existingAchievement])
+  }
 
   const handleSave = async () => {
     if (!title.trim() || !achievedDate) {
@@ -106,7 +85,7 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
   const isLoading = createAchievement.isPending
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open onOpenChange={onClose}>
       <DialogContent className="border-border bg-background/95 backdrop-blur-xl text-foreground max-w-md max-h-[90vh] overflow-y-auto sm:rounded-2xl shadow-2xl shadow-primary/10">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
@@ -123,7 +102,7 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setType("belt")}
+                onClick={() => applySelection("belt", selectedBelt, stripeNumber)}
                 className={`
                   flex-1 py-2 px-4 rounded-lg border-2 transition-all font-medium
                   ${type === "belt"
@@ -135,7 +114,7 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
               </button>
               <button
                 type="button"
-                onClick={() => setType("stripe")}
+                onClick={() => applySelection("stripe", selectedBelt, stripeNumber)}
                 className={`
                   flex-1 py-2 px-4 rounded-lg border-2 transition-all font-medium
                   ${type === "stripe"
@@ -162,7 +141,7 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
                     <button
                       key={belt}
                       type="button"
-                      onClick={() => setSelectedBelt(belt)}
+                      onClick={() => applySelection(type, belt, stripeNumber)}
                       className={`
                         relative py-3 px-4 rounded-xl border-2 transition-all font-medium flex items-center justify-center gap-2
                         ${isSelected
@@ -190,7 +169,7 @@ export function AchievementDialog({ isOpen, onClose, userId, existingAchievement
                   <button
                     key={num}
                     type="button"
-                    onClick={() => setStripeNumber(num)}
+                    onClick={() => applySelection(type, selectedBelt, num)}
                     className={`
                       flex-1 py-3 px-4 rounded-xl border-2 transition-all font-bold text-lg
                       ${stripeNumber === num

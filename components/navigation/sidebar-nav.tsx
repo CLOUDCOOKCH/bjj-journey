@@ -2,17 +2,11 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Calendar, BookOpen, Award, Shield, LogOut, Settings, Video } from "lucide-react"
+import { LogOut, Shield } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/journal", label: "Journal", icon: BookOpen },
-  { href: "/techniques", label: "Techniques", icon: Video },
-  { href: "/achievements", label: "Achievements", icon: Award },
-]
+import { cn } from "@/lib/utils"
+import { isActiveRoute, primaryNav, secondaryNav } from "./items"
 
 interface SidebarNavProps {
   belt?: string
@@ -22,65 +16,40 @@ interface SidebarNavProps {
 export function SidebarNav({ belt, name }: SidebarNavProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const athlete = name || session?.user?.name || "Athlete"
+
+  function renderLinks(items: typeof primaryNav | typeof secondaryNav) {
+    return items.map(({ href, label, icon: Icon }) => {
+      const active = isActiveRoute(pathname, href)
+      return <Link key={href} href={href} aria-current={active ? "page" : undefined}
+        className={cn("flex min-h-10 items-center gap-3 rounded-lg px-3 py-1 text-sm font-medium focus-visible:outline-2 focus-visible:outline-ring",
+          active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+        <Icon className="size-4 shrink-0" aria-hidden="true" /> {label}
+      </Link>
+    })
+  }
 
   return (
-    <aside
-      className="fixed left-0 top-0 hidden lg:flex h-full w-64 flex-col border-r border-border bg-card/50 backdrop-blur-xl z-50"
-      style={{ viewTransitionName: 'sidebar' } as React.CSSProperties}
-    >
-      {/* Logo */}
-      <div className="p-8">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-[0_0_15px_-3px_rgba(45,212,191,0.4)]">
-            <Shield className="text-white text-xl" />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-foreground">BJJ JOURNEY</span>
+    <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r bg-sidebar lg:flex"
+      style={{ viewTransitionName: "sidebar" } as React.CSSProperties}>
+      <div className="border-b px-5 py-5">
+        <Link href="/dashboard" className="inline-flex items-center gap-2.5 rounded focus-visible:outline-2 focus-visible:outline-ring">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Shield className="size-5" aria-hidden="true" /></span>
+          <span className="text-base font-bold tracking-tight text-sidebar-foreground">BJJ Journey</span>
         </Link>
       </div>
-
-      {/* Nav Items */}
-      <nav className="mt-4 flex-1 space-y-2 px-4">
-        {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
-          return (
-            <Link key={item.href} href={item.href}>
-              <div className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive
-                ? "bg-primary/10 text-primary border border-primary/20"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                }`}>
-                <Icon className="text-xl transition-colors group-hover:text-primary" />
-                {item.label}
-              </div>
-            </Link>
-          )
-        })}
+      <nav aria-label="Main navigation" className="flex-1 space-y-2 overflow-y-auto px-3 py-3">
+        <div className="space-y-0.5">{renderLinks(primaryNav)}</div>
+        <div className="space-y-0.5 border-t pt-2">{renderLinks(secondaryNav)}</div>
       </nav>
-
-      {/* User Menu */}
-      <div className="px-4 pb-8 mt-auto border-t border-border/5 pt-8">
-        <Link href="/settings" className="block mb-8">
-          <div className="glass-card p-4 rounded-2xl flex items-center gap-3 hover:border-primary/30 cursor-pointer transition-all hover:bg-accent/50 group">
-            <div className="w-10 h-10 rounded-full border border-primary/20 bg-accent flex items-center justify-center text-sm font-bold text-foreground group-hover:border-primary transition-colors">
-              {session?.user?.name?.[0] || "U"}
-            </div>
-            <div className="flex flex-col overflow-hidden flex-1 text-left">
-              <p className="text-xs font-semibold text-foreground truncate">{name || session?.user?.name || "Athlete"}</p>
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
-                <span className="uppercase tracking-wider">{belt ? `${belt} Belt` : "White Belt"}</span>
-              </div>
-            </div>
-            <Settings className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-          </div>
+      <div className="space-y-1 border-t p-3">
+        <Link className="flex min-w-0 items-center gap-3 rounded-lg p-2 hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" href="/settings">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary" aria-hidden="true">{athlete[0]?.toUpperCase()}</span>
+          <span className="min-w-0 text-sm"><span className="block truncate font-medium">{athlete}</span><span className="block truncate text-xs capitalize text-muted-foreground">{belt ?? "White"} Belt</span></span>
         </Link>
-
-        <button
-          onClick={() => signOut({ callbackUrl: "/auth/login" })}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground group cursor-pointer"
-        >
-          <LogOut className="text-xl transition-colors group-hover:text-primary" />
-          Sign Out
-        </button>
+        <Button variant="ghost" className="w-full justify-start text-muted-foreground" onClick={() => void signOut({ callbackUrl: "/auth/login" })}>
+          <LogOut /> Sign out
+        </Button>
       </div>
     </aside>
   )
