@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 
 import { getSession, signIn, useSession } from "next-auth/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import {
   Check,
   Activity,
@@ -79,13 +78,12 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
-      router.push("/dashboard")
+      window.location.replace("/dashboard")
     }
-  }, [status, session, router])
+  }, [status, session])
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
@@ -106,8 +104,7 @@ export default function LoginPage() {
       } else if (!(await getSession())?.user) {
         setError("Your browser did not keep the session. Check the site address and allow cookies, then try again.")
       } else {
-        router.replace("/dashboard")
-        router.refresh()
+        window.location.replace("/dashboard")
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
