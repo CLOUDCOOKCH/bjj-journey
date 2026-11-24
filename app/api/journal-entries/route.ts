@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { journalEntries } from '@/lib/db/schema'
 import { eq, desc, asc, sql } from 'drizzle-orm'
 import { journalEntrySchema } from '@/lib/validations/schema'
-import { handleApiError } from '@/lib/api/errors'
+import { ApiError, handleApiError } from '@/lib/api/errors'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Number(searchParams.get('limit') || '20'), 100)
     const offset = Number(searchParams.get('offset') || '0')
     const sort = searchParams.get('sort') || 'latest'
+    if (!Number.isSafeInteger(limit) || limit < 1 || !Number.isSafeInteger(offset) || offset < 0) {
+      throw new ApiError(400, 'Invalid journal pagination')
+    }
 
     let orderBy
     switch (sort) {
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
       with: {
         techniques: true,
       },
-      orderBy,
+      orderBy: [...orderBy, asc(journalEntries.id)],
       limit,
       offset,
     })
@@ -47,11 +50,12 @@ export async function GET(request: NextRequest) {
       .from(journalEntries)
       .where(eq(journalEntries.userId, user.id!))
 
-    const hasMore = offset + entries.length < count
+    const total = Number(count)
+    const hasMore = offset + entries.length < total
 
     return NextResponse.json({
       entries,
-      total: count,
+      total,
       hasMore,
     })
   } catch (error) {
@@ -63,7 +67,6 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
     const body = await request.json()
-    console.log('Received journal entry request:', JSON.stringify(body))
 
     const data = journalEntrySchema.parse(body)
 
@@ -74,6 +77,7 @@ export async function POST(request: NextRequest) {
       title: data.title || null,
       focusAreas: data.focusAreas || null,
       intensityLevel: data.intensityLevel || null,
+      sessionRpe: data.sessionRpe ?? null,
       durationMinutes: data.durationMinutes,
       notes: data.notes,
     }).returning()

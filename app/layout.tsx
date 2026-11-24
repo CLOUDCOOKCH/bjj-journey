@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
+import localFont from 'next/font/local'
 import { Providers } from '@/components/providers'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+// Geist 1.7.0 from Vercel, distributed under the SIL Open Font License.
+const geist = localFont({ src: './fonts/Geist-Variable.woff2', variable: '--geist-sans', weight: '100 900', display: 'swap' })
+const geistMono = localFont({ src: './fonts/GeistMono-Variable.woff2', variable: '--geist-mono', weight: '100 900', display: 'swap', preload: false })
 
 export const metadata: Metadata = {
   title: 'BJJ Journey',
@@ -36,12 +36,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
         <Providers>
           {children}
         </Providers>
-        <Analytics />
       </body>
     </html>
   )

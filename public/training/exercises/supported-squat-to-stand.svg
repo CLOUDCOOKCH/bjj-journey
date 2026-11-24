@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 262" role="img" aria-labelledby="title desc">
+  <title id="title">Supported squat-to-stand</title>
+  <desc id="desc">Position cue for Supported squat-to-stand. Move between squat and hinge</desc>
+  <rect width="320" height="262" rx="20" fill="#f4f5f8"/>
+  <path d="M56 208h208" stroke="#acb3c2" stroke-width="2" stroke-dasharray="4 6"/>
+  <text x="20" y="28" fill="#007c73" font-family="sans-serif" font-size="11" font-weight="700" letter-spacing="1.8">MOBILITY</text>
+  <g fill="none" stroke="#919aab" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  </g>
+  <g fill="none" stroke="#233049" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="155" cy="82" r="12"/>
+    <path d="M159 103 L180 144 M180 144 L129 161 L133 182 M180 144 L176 161 L199 183 M159 103 L130 119 L109 141 M159 103 L179 121 L154 143"/>
+  </g>
+  <g fill="#007c73">
+    <circle cx="159" cy="103" r="5"/>
+    <circle cx="180" cy="144" r="5"/>
+  </g>
+  <path d="M20 220h280" stroke="#d3d8e1"/>
+  <text x="20" y="244" fill="#233049" font-family="sans-serif" font-size="13" font-weight="700">Move between squat and hinge</text>
+</svg>

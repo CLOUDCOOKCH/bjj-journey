@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  ...(process.env.NEXT_STANDALONE === "1" ? { output: "standalone" } : {}),
   images: {
     unoptimized: true,
   },
- 
 }
 
 export default nextConfig

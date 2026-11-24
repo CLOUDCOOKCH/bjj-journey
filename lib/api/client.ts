@@ -5,22 +5,12 @@
 
 type RequestMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-}
-
-interface ApiError {
-  error: string;
-  statusCode?: number;
-}
-
 /**
  * Makes an authenticated API request using NextAuth credentials
  */
 async function apiRequest<T>(
   endpoint: string,
-  method: RequestMethod = 'GET',
+  method: RequestMethod,
   body?: unknown
 ): Promise<T> {
   const config: RequestInit = {
@@ -31,7 +21,7 @@ async function apiRequest<T>(
     credentials: 'include', // Include cookies for NextAuth session
   };
 
-  if (body && method !== 'GET') {
+  if (body !== undefined && method !== 'GET') {
     config.body = JSON.stringify(body);
   }
 
@@ -42,16 +32,15 @@ async function apiRequest<T>(
     return undefined as T;
   }
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const error: ApiError = typeof data === 'object' && 'error' in data
-      ? data
-      : { error: 'An unexpected error occurred', statusCode: response.status };
-    throw new Error(error.error);
+    const data: unknown = await response.json().catch(() => null);
+    const message = data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+      ? data.error
+      : 'An unexpected error occurred';
+    throw new Error(message);
   }
 
-  return data;
+  return response.json();
 }
 
 /**

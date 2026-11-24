@@ -1,3 +1,5 @@
+import { ZodError } from 'zod'
+
 export class ApiError extends Error {
   constructor(
     public statusCode: number,
@@ -9,8 +11,6 @@ export class ApiError extends Error {
 }
 
 export function handleApiError(error: unknown) {
-  console.error('API Error:', error)
-
   if (error instanceof ApiError) {
     return Response.json(
       { error: error.message },
@@ -18,27 +18,14 @@ export function handleApiError(error: unknown) {
     )
   }
 
-  if (error instanceof Error) {
-    // Zod validation errors
-    if (error.name === 'ZodError') {
-      // Parse Zod error to get the actual validation messages
-      try {
-        const zodError = JSON.parse(error.message)
-        const firstError = zodError.issues?.[0]
-        const errorMessage = firstError?.message || 'Invalid request data'
-        return Response.json(
-          { error: errorMessage },
-          { status: 400 }
-        )
-      } catch {
-        return Response.json(
-          { error: 'Invalid request data' },
-          { status: 400 }
-        )
-      }
-    }
+  if (error instanceof ZodError) {
+    return Response.json(
+      { error: error.issues[0]?.message || 'Invalid request data' },
+      { status: 400 }
+    )
   }
 
+  console.error('Unhandled API error', error instanceof Error ? error.name : typeof error)
   return Response.json(
     { error: 'Internal server error' },
     { status: 500 }

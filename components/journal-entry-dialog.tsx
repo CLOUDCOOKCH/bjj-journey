@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import dynamic from "next/dynamic"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -47,14 +47,24 @@ interface JournalEntryDialogProps {
   existingEntry?: JournalEntryWithTechniques
 }
 
-export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, existingEntry }: JournalEntryDialogProps) {
-  const [title, setTitle] = useState("")
-  const [notes, setNotes] = useState("")
-  const [sessionType, setSessionType] = useState<TrainingStyle>("gi")
-  const [durationMinutes, setDurationMinutes] = useState(90)
-  const [focusAreas, setFocusAreas] = useState<string[]>([])
-  const [intensityLevel, setIntensityLevel] = useState(4)
-  const [techniques, setTechniques] = useState<Technique[]>([])
+export function JournalEntryDialog(props: JournalEntryDialogProps) {
+  return props.isOpen
+    ? <JournalEntryForm key={props.existingEntry?.id ?? 'new'} {...props} />
+    : null
+}
+
+function JournalEntryForm({ isOpen, onClose, selectedDate, existingEntry }: JournalEntryDialogProps) {
+  const [title, setTitle] = useState(existingEntry?.title || "")
+  const [notes, setNotes] = useState(existingEntry?.notes || "")
+  const [sessionType, setSessionType] = useState<TrainingStyle>(() => {
+    if (existingEntry?.sessionType === 'competition') return 'open_mat'
+    if (!existingEntry?.sessionType || existingEntry.sessionType === 'regular') return 'gi'
+    return existingEntry.sessionType as TrainingStyle
+  })
+  const [durationMinutes, setDurationMinutes] = useState(existingEntry?.durationMinutes || 90)
+  const [focusAreas, setFocusAreas] = useState<string[]>(() => existingEntry?.focusAreas?.split(",").filter(Boolean) || [])
+  const [intensityLevel, setIntensityLevel] = useState(existingEntry?.intensityLevel || 4)
+  const [techniques, setTechniques] = useState<Technique[]>(existingEntry?.techniques || [])
 
   const queryClient = useQueryClient()
   const createEntry = useCreateJournalEntry({
@@ -73,30 +83,6 @@ export function JournalEntryDialog({ isOpen, onClose, selectedDate, userId, exis
     },
   })
   const createTechnique = useCreateTechnique()
-
-  useEffect(() => {
-    if (existingEntry) {
-      setTitle(existingEntry.title || "")
-      setNotes(existingEntry.notes || "")
-      const mappedSessionType: TrainingStyle =
-        existingEntry.sessionType === 'regular' ? 'gi' :
-        existingEntry.sessionType === 'competition' ? 'open_mat' :
-        (existingEntry.sessionType as TrainingStyle) || 'gi'
-      setSessionType(mappedSessionType)
-      setDurationMinutes(existingEntry.durationMinutes || 90)
-      setFocusAreas(existingEntry.focusAreas?.split(",").filter(Boolean) || [])
-      setIntensityLevel(existingEntry.intensityLevel || 4)
-      setTechniques(existingEntry.techniques || [])
-    } else {
-      setTitle("")
-      setNotes("")
-      setSessionType("gi")
-      setDurationMinutes(90)
-      setFocusAreas([])
-      setIntensityLevel(4)
-      setTechniques([])
-    }
-  }, [existingEntry, isOpen])
 
   const addTechnique = () => {
     setTechniques([...techniques, { name: "", youtubeUrl: "", notes: "" }])

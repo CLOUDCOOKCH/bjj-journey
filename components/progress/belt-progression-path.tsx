@@ -17,7 +17,7 @@ export function BeltProgressionPath({ currentBelt, currentStripes, achievements 
     .filter(a => a.type === 'belt')
     .sort((a, b) => new Date(a.achievedDate).getTime() - new Date(b.achievedDate).getTime())
 
-  const currentBeltIndex = BELT_ORDER.indexOf(currentBelt as any)
+  const currentBeltIndex = BELT_ORDER.findIndex((belt) => belt === currentBelt)
 
   return (
     <Card className="glass-card p-6 lg:p-8 rounded-2xl lg:rounded-3xl">

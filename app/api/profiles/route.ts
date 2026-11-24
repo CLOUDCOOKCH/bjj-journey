@@ -6,6 +6,8 @@ import { eq } from 'drizzle-orm'
 import { profileUpdateSchema } from '@/lib/validations/schema'
 import { handleApiError, ApiError } from '@/lib/api/errors'
 
+const profileUser = { columns: { id: true, email: true, name: true, image: true } } as const
+
 export async function GET() {
   try {
     const user = await requireAuth()
@@ -13,23 +15,23 @@ export async function GET() {
     const profile = await db.query.profiles.findFirst({
       where: eq(profiles.id, user.id!),
       with: {
-        user: true
+        user: profileUser
       }
     })
 
     if (!profile) {
       // Create default profile if it doesn't exist
-      const newProfile = await db.insert(profiles).values({
+      await db.insert(profiles).values({
         id: user.id!,
         belt: 'white',
         monthlyGoal: 12,
-      }).returning()
+      })
 
       // Fetch the created profile with user data
       const createdProfile = await db.query.profiles.findFirst({
         where: eq(profiles.id, user.id!),
         with: {
-          user: true
+          user: profileUser
         }
       })
 
@@ -73,7 +75,7 @@ export async function PATCH(request: NextRequest) {
     const updatedProfile = await db.query.profiles.findFirst({
       where: eq(profiles.id, user.id!),
       with: {
-        user: true
+        user: profileUser
       }
     })
 

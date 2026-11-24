@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { cookies } from "next/headers"
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { profiles } from "@/lib/db/schema"
+import { AthleteSettings } from "@/components/athlete-settings"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { BeltSettings } from "@/components/belt-settings"
@@ -16,26 +19,11 @@ export default async function SettingsPage() {
 
   const userId = session.user.id
 
-  // Get cookies to pass to API routes
-  const cookieStore = await cookies()
-  const cookieHeader = Array.from(cookieStore.getAll())
-    .map(cookie => `${cookie.name}=${cookie.value}`)
-    .join('; ')
-
-  // Fetch data from API
-  const profileRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/profiles`, {
-    cache: 'no-store',
-    headers: {
-      cookie: cookieHeader,
-    },
+  const profile = await db.query.profiles.findFirst({
+    where: eq(profiles.id, userId),
+    columns: { belt: true, monthlyGoal: true },
   })
-
-  if (!profileRes.ok) {
-    throw new Error('Failed to fetch data')
-  }
-
-  const profile = await profileRes.json()
-  const userName = profile?.user?.name || session.user.name || ""
+  const userName = session.user.name || ""
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,13 +33,14 @@ export default async function SettingsPage() {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
-            <p className="text-muted-foreground">Manage your belt rank and training goals</p>
+            <p className="text-muted-foreground">Manage your profile, training preferences and account data</p>
           </div>
 
           <div className="space-y-6">
             <ProfileSettings initialName={userName} userId={userId} />
             <BeltSettings currentBelt={profile?.belt || "white"} userId={userId} />
             <FrequencyGoalSettings currentGoal={profile?.monthlyGoal || 12} userId={userId} />
+            <AthleteSettings userId={userId} />
           </div>
         </div>
       </main>

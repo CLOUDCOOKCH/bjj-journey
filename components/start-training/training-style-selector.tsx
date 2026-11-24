@@ -1,8 +1,8 @@
 "use client"
 
-import { User, ShieldOff, Target, Flame } from "lucide-react"
+import { User, ShieldOff, Target, Flame, Trophy, Circle } from "lucide-react"
 
-export type TrainingStyle = "gi" | "no_gi" | "drilling" | "open_mat"
+export type TrainingStyle = "gi" | "no_gi" | "drilling" | "open_mat" | "regular" | "competition"
 
 interface TrainingStyleSelectorProps {
   value: TrainingStyle
@@ -14,6 +14,8 @@ const trainingStyles = [
   { value: "no_gi" as TrainingStyle, label: "No-Gi", icon: ShieldOff },
   { value: "drilling" as TrainingStyle, label: "Drilling", icon: Target },
   { value: "open_mat" as TrainingStyle, label: "Open Mat", icon: Flame },
+  { value: "competition" as TrainingStyle, label: "Competition", icon: Trophy },
+  { value: "regular" as TrainingStyle, label: "General BJJ", icon: Circle },
 ]
 
 export function TrainingStyleSelector({ value, onChange }: TrainingStyleSelectorProps) {
@@ -31,10 +33,10 @@ export function TrainingStyleSelector({ value, onChange }: TrainingStyleSelector
               value={style.value}
               checked={isSelected}
               onChange={() => onChange(style.value)}
-              className="hidden peer"
+              className="sr-only peer"
             />
             <div
-              className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-ring ${
                 isSelected
                   ? "border-primary bg-primary/5"
                   : "border-border bg-card/30 group-hover:bg-card/50"

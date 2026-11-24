@@ -1,0 +1,10 @@
+.git
+.env*
+**/.env*
+node_modules
+.next
+coverage
+**/*.tsbuildinfo
+*.sql.gz
+*.dump
+.DS_Store

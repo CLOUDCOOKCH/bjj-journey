@@ -1,0 +1,59 @@
+name: Build NAS Docker bundle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, feat/bjj-journey-2]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Linux AMD64 images
+        run: |
+          docker build --platform linux/amd64 --target app -t bjj-journey/app:2.0-nas .
+          docker build --platform linux/amd64 --target init -t bjj-journey/init:2.0-nas .
+          docker pull --platform linux/amd64 postgres:17
+
+      - name: Package NAS bundle
+        run: |
+          bash scripts/package-nas.sh
+          sha256sum bjj-journey-nas-amd64.tar.gz > bjj-journey-nas-amd64.tar.gz.sha256
+
+      - name: Smoke test packaged Compose stack
+        shell: bash
+        run: |
+          staging=$(mktemp -d)
+          tar -xzf bjj-journey-nas-amd64.tar.gz -C "$staging" compose.yaml
+          cd "$staging"
+          umask 077
+          {
+            printf 'NEXTAUTH_URL=http://127.0.0.1:3190\nAPP_PORT=3190\n'
+            printf 'NEXTAUTH_SECRET=%s\nPOSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 32)" "$(openssl rand -hex 32)"
+          } > .env.docker
+          cleanup() {
+            docker compose --env-file .env.docker down --volumes
+            rm -rf -- "$staging"
+          }
+          trap cleanup EXIT
+          docker compose --env-file .env.docker up -d --wait --wait-timeout 120
+          curl --fail --silent --show-error http://127.0.0.1:3190/api/auth/session |
+            jq --exit-status '. == {}'
+          count=$(docker compose --env-file .env.docker exec -T db psql -U bjj_journey -d bjj_journey -Atc 'SELECT count(*) FROM training_exercise_catalog')
+          test "$count" -ge 135
+
+      - name: Upload bundle and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: bjj-journey-nas-amd64
+          path: |
+            bjj-journey-nas-amd64.tar.gz
+            bjj-journey-nas-amd64.tar.gz.sha256
+          if-no-files-found: error
+          compression-level: 0

@@ -19,7 +19,7 @@ export type ReviewTechniqueWithVideos = ReviewTechnique & {
   }>
 }
 
-interface ReviewTechniquesFilters {
+export interface ReviewTechniquesFilters {
   category?: string
   beltLevel?: string
   difficulty?: string

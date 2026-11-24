@@ -92,51 +92,56 @@ BJJ Journey is a full-stack web app for tracking your Brazilian Jiu Jitsu traini
 
 ## Getting Started
 
+### Docker self-hosting
+
+Download the Intel/AMD NAS bundle from the **Build NAS Docker bundle** workflow in GitHub Actions. Open a successful run and download the `bjj-journey-nas-amd64` artifact, then follow its README.
+
+Use [Docker Compose with PostgreSQL and Cloudflare Tunnel](docs/docker.md) to run BJJ Journey on your own host.
+
 ### Prerequisites
 
-- Node.js 18+
-- PostgreSQL database ([Neon](https://neon.tech) recommended)
+- Node.js 20 and pnpm 10, matching CI
+- A dedicated Neon PostgreSQL development database
 
 ### Setup
 
+From the repository root:
+
 ```bash
-# Clone the repository
-git clone https://github.com/dennisrongo/bjj-journey.git
-cd bjj-journey
-
-# Install dependencies
-npm install
-
-# Set up environment variables
+pnpm install --frozen-lockfile
 cp .env.example .env
-# Edit .env with your DATABASE_URL, NEXTAUTH_URL, and NEXTAUTH_SECRET
-
-# Push database schema
-npm run db:push
-
-# Start development server
-npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to get started.
+Set `DATABASE_URL`, `NEXTAUTH_URL` (usually `http://localhost:3000`) and `NEXTAUTH_SECRET` in the ignored `.env` file. Generate the secret with `openssl rand -base64 32`. Supply the database URL to the migration process, then start the app.
 
-### Environment Variables
+```bash
+node --env-file=.env scripts/migrate-training.mjs --check
+node --env-file=.env scripts/migrate-training.mjs --apply
+node --env-file=.env scripts/seed-training-catalog.mjs --apply
+pnpm dev
+```
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `NEXTAUTH_URL` | Base URL (`http://localhost:3000` for dev) |
-| `NEXTAUTH_SECRET` | Secret key - generate with `openssl rand -base64 32` |
+See the [migration runbook](docs/training-migrations.md) for upgrades from an existing database and the [athlete platform architecture](docs/athlete-platform.md) for data ownership, training calculations and content provenance.
+
+## Athlete performance
+
+- **Training** includes mobility, strength, conditioning, solo drills and recovery exercise libraries, templates and live workouts.
+- **Calendar** schedules sessions, recurring activities and rest days, and opens workouts and journal logging from planned activities. Reminders appear in the app.
+- **Recovery and Progress** track optional readiness inputs, discomfort history, completed training load, benchmarks and goals.
+- **Programmes and Competitions** provide editable training plans, BJJ strength templates and event preparation.
+- **Journal and Settings** include session and weekly reflections, training units, time zone, account export and account deletion.
+
+An already-open workout accepts edits when connectivity drops and syncs after reconnecting. Starting and completing a workout require a connection. Readiness guidance and training load trends are informational. Wearable and external calendar integrations are reserved for future work.
 
 ## Scripts
 
 ```bash
-npm run dev          # Start dev server
-npm run build        # Production build
-npm run lint         # ESLint
-npm test             # Run tests
-npm run db:push      # Push schema to database
-npm run db:studio    # Open Drizzle Studio GUI
+pnpm dev                                  # Start Next.js with hot reload
+pnpm build                                # Build for production
+pnpm lint                                 # Run ESLint
+pnpm exec tsc --noEmit --incremental false # Check TypeScript
+pnpm test                                 # Run Jest
+pnpm test:coverage                        # Check Jest coverage
 ```
 
 ## Project Structure

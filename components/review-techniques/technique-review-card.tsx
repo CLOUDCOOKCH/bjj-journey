@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Play, Star, Eye, Clock, Video, Edit, MoreVertical } from 'lucide-react'
+import { Play, Star, Eye, Clock, Video, Edit } from 'lucide-react'
 import type { ReviewTechniqueWithVideos } from '@/lib/hooks/use-review-techniques'
 import { useState } from 'react'
 import { TechniqueVideoPlayer } from './technique-video-player'
@@ -39,6 +39,10 @@ const CATEGORY_CONFIG = {
   escapes: { label: 'Escape', icon: '🚪' },
 } as const
 
+function getBadge<T extends object>(config: T, key: string | null) {
+  return key && Object.hasOwn(config, key) ? config[key as keyof T] : undefined
+}
+
 export function TechniqueReviewCard({
   technique,
   variant = 'full',
@@ -48,6 +52,8 @@ export function TechniqueReviewCard({
   const [isPlaying, setIsPlaying] = useState(false)
   const hasVideo = technique.videos && technique.videos.length > 0
   const firstVideo = hasVideo ? technique.videos[0] : null
+  const difficulty = getBadge(DIFFICULTY_CONFIG, technique.difficulty)
+  const belt = getBadge(BELT_CONFIG, technique.beltLevel)
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -161,14 +167,14 @@ export function TechniqueReviewCard({
 
               {/* Difficulty & Training Type Badges */}
               <div className="absolute bottom-3 left-4 flex items-center gap-2">
-                {technique.difficulty && (
+                {difficulty && (
                   <span
                     className={cn(
                       'text-[10px] font-bold px-2 py-1 rounded uppercase border',
-                      DIFFICULTY_CONFIG[technique.difficulty]?.className
+                      difficulty.className
                     )}
                   >
-                    {DIFFICULTY_CONFIG[technique.difficulty]?.label}
+                    {difficulty.label}
                   </span>
                 )}
                 {technique.trainingType && (
@@ -202,14 +208,14 @@ export function TechniqueReviewCard({
               <h3 className="font-bold text-lg text-slate-100 group-hover:text-teal-400 transition-colors line-clamp-1">
                 {technique.name}
               </h3>
-              {technique.beltLevel && (
+              {belt && (
                 <span
                   className={cn(
                     'text-[10px] font-bold px-2 py-0.5 rounded uppercase border mt-1 inline-block',
-                    BELT_CONFIG[technique.beltLevel]?.className
+                    belt.className
                   )}
                 >
-                  {BELT_CONFIG[technique.beltLevel]?.label}
+                  {belt.label}
                 </span>
               )}
             </div>

@@ -29,11 +29,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Run tests
         run: pnpm test
 
       - name: Run tests with coverage
         run: pnpm test:coverage
+
+      - name: Build and check types
+        env:
+          DATABASE_URL: postgresql://build@localhost:5432/build
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: pnpm build
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

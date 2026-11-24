@@ -3,7 +3,7 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface Video {
   id: string
@@ -19,47 +19,35 @@ interface TechniqueVideoPlayerProps {
   open: boolean
 }
 
-export function TechniqueVideoPlayer({ videos, onClose, open }: TechniqueVideoPlayerProps) {
+export function TechniqueVideoPlayer(props: TechniqueVideoPlayerProps) {
+  if (!props.open || !props.videos.length) return null
+  return <OpenTechniqueVideoPlayer {...props} />
+}
+
+function OpenTechniqueVideoPlayer({ videos, onClose }: TechniqueVideoPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-
-  // Reset to first video when player opens
-  useEffect(() => {
-    if (open) {
-      setCurrentIndex(0)
-    }
-  }, [open])
-
-  if (videos.length === 0) {
-    return null
-  }
-
-  const currentVideo = videos[currentIndex]
+  const videoCount = videos.length
+  const activeIndex = currentIndex % videoCount
+  const currentVideo = videos[activeIndex]
   const videoId = extractYouTubeId(currentVideo.youtubeUrl)
 
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : videos.length - 1))
-  }
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev < videos.length - 1 ? prev + 1 : 0))
-  }
+  const moveVideo = useCallback((step: number) => {
+    setCurrentIndex((prev) => (prev + step + videoCount) % videoCount)
+  }, [videoCount])
 
   // Handle keyboard navigation
   useEffect(() => {
-    if (!open) return
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goToPrevious()
-      if (e.key === 'ArrowRight') goToNext()
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft') moveVideo(-1)
+      if (e.key === 'ArrowRight') moveVideo(1)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, videos.length])
+  }, [moveVideo])
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open onOpenChange={onClose}>
       <DialogContent
         className="max-w-4xl w-full p-0 max-h-[85vh] overflow-y-auto glass-card flex flex-col"
         showCloseButton={false}
@@ -67,23 +55,23 @@ export function TechniqueVideoPlayer({ videos, onClose, open }: TechniqueVideoPl
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border/50 shrink-0 sticky top-0 bg-inherit z-10 backdrop-blur-md">
           <h3 className="text-lg font-semibold text-slate-100 truncate flex-1 min-w-0 pr-4">
-            {currentVideo.title || `Video ${currentIndex + 1}`}
+            {currentVideo.title || `Video ${activeIndex + 1}`}
           </h3>
           <div className="flex items-center gap-2 shrink-0">
             {videos.length > 1 && (
               <>
-                <Button variant="ghost" size="icon" onClick={goToPrevious} className="text-slate-400 hover:text-slate-100">
+                <Button variant="ghost" size="icon" aria-label="Previous video" onClick={() => moveVideo(-1)} className="text-slate-400 hover:text-slate-100">
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
                 <span className="text-sm text-slate-500 min-w-[3rem] text-center hidden sm:inline-block">
-                  {currentIndex + 1} / {videos.length}
+                  {activeIndex + 1} / {videoCount}
                 </span>
-                <Button variant="ghost" size="icon" onClick={goToNext} className="text-slate-400 hover:text-slate-100">
+                <Button variant="ghost" size="icon" aria-label="Next video" onClick={() => moveVideo(1)} className="text-slate-400 hover:text-slate-100">
                   <ChevronRight className="w-5 h-5" />
                 </Button>
               </>
             )}
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-slate-100">
+            <Button variant="ghost" size="icon" aria-label="Close player" onClick={onClose} className="text-slate-400 hover:text-slate-100">
               <X className="w-5 h-5" />
             </Button>
           </div>
