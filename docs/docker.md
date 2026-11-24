@@ -15,6 +15,19 @@ Run the Compose stack on the same host as your existing `cloudflared` connector.
 
    The `init` service exits successfully after applying migrations and seeding the curated catalog. If it fails, inspect its log before retrying. The app listens on host loopback at port 3000 by default. Set `APP_PORT` before starting if that port is occupied. PostgreSQL is reachable by other Compose services over the private network.
 
+## Pull the prebuilt NAS images from GHCR
+
+On a 64-bit Intel or AMD NAS, save `compose.ghcr.yaml` as `compose.yaml` in a folder with your configured `.env.docker`. Keep the same Compose project and folder if upgrading an existing installation so the data volume retains its name.
+
+If the packages are private, run `docker login ghcr.io -u YOUR_GITHUB_USERNAME` and enter a GitHub personal access token (classic) with `read:packages` at the password prompt. The account must have access to both packages.
+
+```sh
+docker compose --env-file .env.docker pull
+docker compose --env-file .env.docker up -d --wait
+```
+
+The **Publish NAS images to GHCR** workflow publishes the app and initializer after the smoke test passes. Run the same commands to pick up new images at the `2.0-nas` tag.
+
 ## Route access through Cloudflare
 
 1. In Cloudflare Zero Trust, create a **Self-hosted** Access application covering the entire hostname. Add an **Allow** policy for the intended identities and remove any bypass policy that would grant broader access.
