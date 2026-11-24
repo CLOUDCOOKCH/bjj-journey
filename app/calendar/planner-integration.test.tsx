@@ -117,12 +117,16 @@ test('logs a scheduled mat session through the atomic planner action and preserv
     return fallback(path)
   })
   renderWithQuery(<StartTrainingPage />)
-  expect(await screen.findByRole('radio', { name: 'No-Gi' })).toBeChecked()
-  fireEvent.change(screen.getByLabelText(/Session RPE/), { target: { value: '7' } })
+  expect(await screen.findByLabelText('Session type')).toHaveValue('no_gi')
+  fireEvent.change(screen.getByLabelText('Sparring rounds'), { target: { value: '4' } })
+  fireEvent.change(screen.getByLabelText('Positions trained'), { target: { value: 'Half guard' } })
+  fireEvent.change(screen.getByLabelText('What worked?'), { target: { value: 'Underhook sweep' } })
+  fireEvent.change(screen.getByLabelText('What will you drill next?'), { target: { value: 'Bottom frames' } })
+  fireEvent.change(screen.getByLabelText(/Session effort/), { target: { value: '7' } })
   fireEvent.click(screen.getByRole('button', { name: 'Save Session' }))
   await waitFor(() => expect(save).toHaveBeenCalledWith({
     version: 1,
-    data: expect.objectContaining({ entryDate: plannerDate, sessionType: 'no_gi', sessionRpe: 7, durationMinutes: 90 }),
+    data: expect.objectContaining({ entryDate: plannerDate, sessionType: 'no_gi', sessionRpe: 7, durationMinutes: 90, trainingDetails: { sparringRounds: 4, positionsTrained: 'Half guard', successfulTechniques: 'Underhook sweep', techniquesToImprove: 'Bottom frames' } }),
   }))
   await waitFor(() => expect(push).toHaveBeenCalledWith(`/calendar?date=${plannerDate}`))
 })
@@ -145,6 +149,9 @@ test('hides dashboard widgets from account preferences and saves future changes 
 
   renderWithQuery(<DashboardPage />)
   expect(await screen.findByRole('heading', { name: 'Belt progression' })).toBeInTheDocument()
+  expect(screen.queryByText('Strength', { exact: true })).not.toBeInTheDocument()
+  expect(screen.queryByText('Mobility', { exact: true })).not.toBeInTheDocument()
+  expect(screen.getAllByRole('link', { name: 'Log mat session' }).length).toBeGreaterThan(0)
   expect(screen.queryByRole('heading', { name: 'Recovery' })).not.toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Customise' }))
   fireEvent.click(screen.getByRole('checkbox', { name: 'Recovery' }))

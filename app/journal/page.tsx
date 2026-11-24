@@ -18,12 +18,8 @@ import { Badge } from "@/components/ui/badge"
 import { ButtonLoader } from "@/components/loading/button-loader"
 import {
   Search,
-  Calendar,
   Clock,
-  Zap,
   BookOpen,
-  Tag,
-  Filter,
   X,
   Trash2,
   ChevronDown,
@@ -31,7 +27,7 @@ import {
 } from "lucide-react"
 import { formatDateString } from "@/lib/utils/date"
 import Link from "next/link"
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo } from "react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   AlertDialog,
@@ -50,9 +46,10 @@ import { PageHeader } from "@/components/page-header"
 const sessionTypes = [
   { value: "all", label: "All" },
   { value: "gi", label: "Gi" },
-  { value: "nogi", label: "No-Gi" },
-  { value: "drilling", label: "Conditioning" },
-  { value: "open_mat", label: "Study" },
+  { value: "no_gi", label: "No-Gi" },
+  { value: "drilling", label: "Drilling" },
+  { value: "open_mat", label: "Open mat" },
+  { value: "competition", label: "Competition" },
 ]
 
 const sortOptions = [
@@ -65,7 +62,7 @@ const sortOptions = [
 function getSessionTypeBadge(type: string) {
   const typeConfig: Record<string, { color: string; label: string }> = {
     gi: { color: "bg-teal-500/10 text-teal-400 border-teal-500/20", label: "Gi" },
-    nogi: { color: "bg-purple-500/10 text-purple-400 border-purple-500/20", label: "No-Gi" },
+    no_gi: { color: "bg-purple-500/10 text-purple-400 border-purple-500/20", label: "No-Gi" },
     open_mat: { color: "bg-orange-500/10 text-orange-400 border-orange-500/20", label: "Open Mat" },
     private: { color: "bg-green-500/10 text-green-400 border-green-500/20", label: "Private" },
     competition: { color: "bg-red-500/10 text-red-400 border-red-500/20", label: "Competition" },
@@ -97,7 +94,6 @@ export default function JournalPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedType, setSelectedType] = useState<string>("all")
   const [selectedSort, setSelectedSort] = useState<string>("latest")
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null)
   const [isSortOpen, setIsSortOpen] = useState(false)
 
@@ -120,11 +116,13 @@ export default function JournalPage() {
       const matchesSearch = !searchQuery ||
         entry.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.notes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        [entry.trainingDetails?.positionsTrained, entry.trainingDetails?.successfulTechniques, entry.trainingDetails?.techniquesToImprove]
+          .some(value => value?.toLowerCase().includes(searchQuery.toLowerCase())) ||
         entry.techniques.some(t =>
           t.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
 
-      const matchesType = selectedType === "all" || entry.sessionType === selectedType
+      const matchesType = selectedType === "all" || (entry.sessionType === "nogi" ? "no_gi" : entry.sessionType) === selectedType
 
       return matchesSearch && matchesType
     })
@@ -132,7 +130,7 @@ export default function JournalPage() {
 
   const selectedSortLabel = useMemo(() =>
     sortOptions.find(opt => opt.value === selectedSort)?.label || "Latest First",
-    [sortOptions, selectedSort]
+    [selectedSort]
   )
 
   if (status === "loading") {
@@ -145,36 +143,6 @@ export default function JournalPage() {
 
   if (isLoading || profileLoading) {
     return <JournalSkeleton belt={profile?.belt} />
-  }
-
-  const getSessionTypeBadge = (type: string) => {
-    const typeConfig = {
-      gi: { color: "bg-teal-500/10 text-teal-400 border-teal-500/20", label: "Gi" },
-      nogi: { color: "bg-purple-500/10 text-purple-400 border-purple-500/20", label: "No-Gi" },
-      open_mat: { color: "bg-orange-500/10 text-orange-400 border-orange-500/20", label: "Open Mat" },
-      private: { color: "bg-green-500/10 text-green-400 border-green-500/20", label: "Private" },
-      competition: { color: "bg-red-500/10 text-red-400 border-red-500/20", label: "Competition" },
-      drilling: { color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", label: "Drilling" },
-      regular: { color: "bg-slate-500/10 text-slate-400 border-slate-500/20", label: "Regular" },
-    }
-    const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.regular
-    return config
-  }
-
-  const getIntensityColor = (level: number | null) => {
-    if (level === null) return "bg-slate-700"
-    if (level <= 2) return "bg-teal-500"
-    if (level <= 3) return "bg-yellow-500"
-    if (level <= 4) return "bg-orange-500"
-    return "bg-red-500"
-  }
-
-  const getIntensityLabel = (level: number | null) => {
-    if (level === null) return ""
-    if (level <= 2) return "Low"
-    if (level <= 3) return "Moderate"
-    if (level <= 4) return "High"
-    return "Extreme"
   }
 
   const handleDelete = async () => {
@@ -309,7 +277,7 @@ export default function JournalPage() {
               <>
                 <div className="space-y-4">
                   {filteredEntries.map((entry: JournalEntryWithTechniques, index: number) => {
-                    const badgeConfig = getSessionTypeBadge(entry.sessionType)
+                    const badgeConfig = getSessionTypeBadge(entry.sessionType === "nogi" ? "no_gi" : entry.sessionType)
                     const displayTitle = entry.title || `${badgeConfig.label} Session`
 
                     return (
@@ -356,6 +324,13 @@ export default function JournalPage() {
                                     </div>
                                   )}
                                 </div>
+
+                                {entry.trainingDetails?.techniquesToImprove && (
+                                  <p className="mb-2 line-clamp-2 text-sm"><strong className="font-medium">Drill next</strong>{" "}{entry.trainingDetails.techniquesToImprove}</p>
+                                )}
+                                {entry.trainingDetails?.sparringRounds != null && (
+                                  <p className="mb-2 text-xs text-muted-foreground">{entry.trainingDetails.sparringRounds} sparring {entry.trainingDetails.sparringRounds === 1 ? "round" : "rounds"}</p>
+                                )}
 
                                 {entry.notes && (
                                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">

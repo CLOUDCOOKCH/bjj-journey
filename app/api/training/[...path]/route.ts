@@ -15,7 +15,6 @@ const completionBody = z.object({ version }).strict()
 const journalBody = z.union([
   z.object({
     version, data: journalEntrySchema.extend({
-      sessionRpe: z.number().int().min(0).max(10).optional(),
       techniques: z.array(z.object({
         name: z.string().trim().min(1).max(200),
         youtubeUrl: z.string().url().startsWith('https://').nullable().optional(),

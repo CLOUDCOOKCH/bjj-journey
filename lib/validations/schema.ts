@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { trainingDetailsSchema } from './journal-details'
 
 // ============================================================================
 // Authentication Schemas
@@ -55,6 +56,7 @@ export const journalEntrySchema = z.object({
   focusAreas: z.string().max(500, 'Focus areas too long').optional(),
   intensityLevel: z.number().int().min(1).max(5).optional(),
   sessionRpe: z.number().int().min(0).max(10).nullable().optional(),
+  trainingDetails: trainingDetailsSchema.optional(),
   durationMinutes: z.number().int().min(15).max(480).default(90),
   notes: z.string().nullable().optional(),
 })
@@ -65,6 +67,7 @@ export const journalEntryUpdateSchema = z.object({
   focusAreas: z.string().max(500).optional(),
   intensityLevel: z.number().int().min(1).max(5).optional(),
   sessionRpe: z.number().int().min(0).max(10).nullable().optional(),
+  trainingDetails: trainingDetailsSchema.optional(),
   durationMinutes: z.number().int().min(15).max(480).optional(),
   notes: z.string().nullable().optional(),
 })

@@ -239,6 +239,7 @@ export function ProgressWorkspace({ userId }: { userId: string }) {
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline"><Link href="/achievements"><Trophy aria-hidden="true" /> Belt progression and achievements</Link></Button>
         <Button asChild variant="outline"><Link href="/calendar"><Target aria-hidden="true" /> Training planner</Link></Button>
+        <Button asChild variant="outline"><Link href="/training">Other training records</Link></Button>
       </div>
     </>
   )

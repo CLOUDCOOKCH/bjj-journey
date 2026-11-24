@@ -46,10 +46,10 @@ DECLARE
 
  payload := '{"title":"Open Mat","category":"open_mat","date":"2026-11-25","timeZone":"Europe/Berlin","durationMinutes":90,"status":"planned"}';
  PERFORM save_training_record(alice, activity_j, 'activities', NULL, payload);
- result := complete_training_journal_activity(alice, activity_j, 1, NULL, '{"entryDate":"2026-11-25","sessionType":"open_mat","durationMinutes":90,"sessionRpe":0,"techniques":[{"name":"Escape"}]}');
+ result := complete_training_journal_activity(alice, activity_j, 1, NULL, '{"entryDate":"2026-11-25","sessionType":"open_mat","durationMinutes":90,"sessionRpe":0,"trainingDetails":{"sparringRounds":4,"techniquesToImprove":"Bottom frames"},"techniques":[{"name":"Escape"}]}');
  IF result.state <> 'completed' OR NOT (result.data ? 'journalEntryId') THEN RAISE EXCEPTION 'Mat completion failed'; END IF;
- IF NOT EXISTS (SELECT 1 FROM journal_entries WHERE user_id = alice AND session_rpe = 0) THEN
-   RAISE EXCEPTION 'Explicit RPE zero was lost';
+ IF NOT EXISTS (SELECT 1 FROM journal_entries WHERE user_id = alice AND session_rpe = 0 AND training_details @> '{"sparringRounds":4,"techniquesToImprove":"Bottom frames"}'::jsonb) THEN
+   RAISE EXCEPTION 'Explicit RPE zero or quick log details were lost';
  END IF;
  result := complete_training_journal_activity(alice, activity_j, 1, NULL, '{"entryDate":"2026-11-25","sessionType":"open_mat","durationMinutes":90}');
  IF (SELECT count(*) FROM journal_entries WHERE user_id = alice) <> 1 THEN RAISE EXCEPTION 'Mat journal was duplicated'; END IF;

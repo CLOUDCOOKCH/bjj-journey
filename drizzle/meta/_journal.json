@@ -50,6 +50,13 @@
       "when": 1795515091628,
       "tag": "0006_curated_exercise_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795526175575,
+      "tag": "0007_quick_mat_log",
+      "breakpoints": true
     }
   ]
 }

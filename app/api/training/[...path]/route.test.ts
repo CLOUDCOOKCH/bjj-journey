@@ -2,7 +2,7 @@
 
 import { ApiError } from '@/lib/api/errors'
 import { getCurrentUser } from '@/lib/api/auth'
-import { completeWorkout, saveRecord, listRecords } from '@/lib/training/store'
+import { completeJournalActivity, completeWorkout, saveRecord, listRecords } from '@/lib/training/store'
 import { GET, POST, PATCH } from './route'
 
 jest.mock('@/lib/api/auth', () => ({ getCurrentUser: jest.fn() }))
@@ -10,6 +10,7 @@ jest.mock('@/lib/training/store', () => ({
   saveRecord: jest.fn(),
   listRecords: jest.fn(),
   completeWorkout: jest.fn(),
+  completeJournalActivity: jest.fn(),
   translateTrainingError: (error: unknown) => error,
 }))
 
@@ -62,4 +63,21 @@ test('returns a safe unavailable response when completion is outside the owner s
   expect(await response.json()).toEqual({ error: 'Workout unavailable' })
   expect(response.status).toBe(404)
   expect(completeWorkout).toHaveBeenCalledWith(owner, record, 2)
+})
+
+test('accepts quick mat notes for a planned session with no effort rating', async () => {
+  jest.mocked(completeJournalActivity).mockResolvedValue({
+    id: record, version: 2, createdAt: '', updatedAt: '',
+    data: { title: 'Gi class', category: 'bjj_gi', date: '2026-11-24', timeZone: 'UTC', durationMinutes: 60, status: 'completed' },
+  })
+  const data = {
+    entryDate: '2026-11-24', sessionType: 'gi', durationMinutes: 60, sessionRpe: null,
+    trainingDetails: { sparringRounds: 0, techniquesToImprove: 'Bottom frames' },
+  }
+  const response = await POST(
+    request('POST', `activities/${record}/journal`, { version: 1, data }),
+    context('activities', record, 'journal'),
+  )
+  expect(response.status).toBe(200)
+  expect(completeJournalActivity).toHaveBeenCalledWith(owner, record, 1, { version: 1, data })
 })

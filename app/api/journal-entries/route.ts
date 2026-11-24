@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       focusAreas: data.focusAreas || null,
       intensityLevel: data.intensityLevel || null,
       sessionRpe: data.sessionRpe ?? null,
+      trainingDetails: data.trainingDetails,
       durationMinutes: data.durationMinutes,
       notes: data.notes,
     }).returning()

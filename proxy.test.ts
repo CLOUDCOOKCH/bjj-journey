@@ -12,7 +12,7 @@ afterEach(() => {
   else process.env.NEXTAUTH_URL = previousUrl
 })
 
-function request(url: string, options: RequestInit = {}) {
+function request(url: string, options: { method?: string; headers?: Record<string, string> } = {}) {
   return new NextRequest(url, { ...options, headers: { host: new URL(url).host, ...options.headers } })
 }
 

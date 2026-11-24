@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Ellipsis, LogOut, Plus } from "lucide-react"
+import { Ellipsis, LogOut } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
@@ -37,7 +37,6 @@ export function MobileBottomNav() {
             <SheetDescription className="sr-only">Additional training and account pages</SheetDescription>
           </SheetHeader>
           <div className="grid gap-1 px-4 pb-3">
-            <SheetClose asChild><Button asChild className="justify-start"><Link href="/start-training"><Plus /> Log mat session</Link></Button></SheetClose>
             {secondaryNav.map(({ href, label, icon: Icon }) => <SheetClose asChild key={href}>
               <Link href={href} aria-current={isActiveRoute(pathname, href) ? "page" : undefined}
                 className={cn("flex min-h-11 items-center gap-2.5 rounded-lg px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-ring",

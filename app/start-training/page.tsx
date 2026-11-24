@@ -7,12 +7,14 @@ import { useTheme } from "next-themes"
 import dynamic from "next/dynamic"
 import { SidebarNav } from "@/components/navigation/sidebar-nav"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
-import { TrainingStyleSelector, TrainingStyle } from "@/components/start-training/training-style-selector"
+import type { TrainingStyle } from "@/components/start-training/training-style-selector"
 import { FocusAreaTags } from "@/components/start-training/focus-area-tags"
 import { IntensityLevelBar } from "@/components/start-training/intensity-level-bar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import type { TrainingDetails } from "@/lib/validations/journal-details"
 import { Save, X } from "lucide-react"
 import { useCreateJournalEntry, useUpdateJournalEntry } from "@/lib/hooks"
 import { journalEntryKeys } from "@/lib/hooks"
@@ -47,12 +49,13 @@ function StartTrainingForm({ initialDate, entry, activity }: {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const queryClient = useQueryClient()
-  const initialStyle = entry?.sessionType as TrainingStyle | undefined
+  const initialStyle = (entry?.sessionType === "nogi" ? "no_gi" : entry?.sessionType) as TrainingStyle | undefined
   const [title, setTitle] = useState(entry?.title ?? activity?.data.title ?? "")
   const [trainingStyle, setTrainingStyle] = useState<TrainingStyle>(initialStyle || defaultStyle(activity?.data))
   const [durationMinutes, setDurationMinutes] = useState(entry?.durationMinutes ?? Math.max(15, Math.min(480, activity?.data.durationMinutes || 90)))
   const [focusAreas, setFocusAreas] = useState<string[]>(entry?.focusAreas?.split(",").filter(Boolean) ?? [])
-  const [intensityLevel, setIntensityLevel] = useState(entry?.intensityLevel ?? 4)
+  const [intensityLevel, setIntensityLevel] = useState<number | undefined>(entry?.intensityLevel ?? undefined)
+  const [trainingDetails, setTrainingDetails] = useState<TrainingDetails>(entry?.trainingDetails ?? {})
   const [sessionRpe, setSessionRpe] = useState<number | undefined>(entry?.sessionRpe ?? undefined)
   const [notes, setNotes] = useState(entry?.notes ?? "")
   const [isSaving, setIsSaving] = useState(false)
@@ -85,7 +88,8 @@ function StartTrainingForm({ initialDate, entry, activity }: {
         focusAreas: focusAreas.join(",") || undefined,
         intensityLevel,
         durationMinutes,
-        sessionRpe,
+        sessionRpe: sessionRpe ?? null,
+        trainingDetails,
         notes: notes || null,
       }
       if (entry) {
@@ -100,7 +104,7 @@ function StartTrainingForm({ initialDate, entry, activity }: {
         await createEntry.mutateAsync({ ...details, entryDate: initialDate })
       }
       await queryClient.invalidateQueries({ queryKey: journalEntryKeys.all })
-      router.push(`/calendar?date=${initialDate}`)
+      router.push(activity ? `/calendar?date=${initialDate}` : "/journal")
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Failed to save session. Try again.")
       setIsSaving(false)
@@ -120,82 +124,78 @@ function StartTrainingForm({ initialDate, entry, activity }: {
         />
 
         <div className="container mx-auto px-4 lg:px-8 py-8 max-w-5xl">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave() }} className="space-y-8">
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 rounded-3xl bg-card/40 border border-border/50">
-                <Label htmlFor="journal-title" className="mb-3 block text-sm font-medium">
-                  Session title
-                </Label>
-                <Input
-                  id="journal-title"
-                  maxLength={200}
-                  placeholder="Morning Gi class"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
-                />
+          <form onSubmit={(event) => { event.preventDefault(); void handleSave() }} className="mx-auto max-w-2xl space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2 space-y-1 sm:col-span-1">
+                <Label htmlFor="journal-style">Session type</Label>
+                <select id="journal-style" className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={trainingStyle} onChange={event => setTrainingStyle(event.target.value as TrainingStyle)}>
+                  <option value="gi">Gi</option><option value="no_gi">No-Gi</option>
+                  <option value="open_mat">Open mat</option><option value="drilling">Drilling</option>
+                  <option value="competition">Competition</option><option value="regular">Other mat session</option>
+                </select>
               </div>
-              <div className="p-6 rounded-3xl bg-card/40 border border-border/50">
-                <Label htmlFor="journal-duration" className="mb-3 block text-sm font-medium">Duration (minutes)</Label>
-                <Input id="journal-duration" type="number" min={15} max={480} required
+              <div className="space-y-1">
+                <Label htmlFor="journal-duration">Mat time (min)</Label>
+                <Input id="journal-duration" className="min-h-11" type="number" min={15} max={480} required
                   value={Number.isNaN(durationMinutes) ? "" : durationMinutes}
                   onChange={(event) => setDurationMinutes(event.target.valueAsNumber)} />
               </div>
-            </section>
-
-            <section className="p-8 rounded-3xl bg-card/40 border border-border/50">
-              <h2 className="text-sm font-bold text-foreground mb-6">Training Style</h2>
-              <TrainingStyleSelector value={trainingStyle} onChange={setTrainingStyle} />
-            </section>
-
-            <section className="p-8 rounded-3xl bg-card/40 border border-border/50">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-sm font-bold text-foreground">Focus Areas</h2>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                  Select all that apply
-                </span>
+              <div className="space-y-1">
+                <Label htmlFor="journal-rounds">Sparring rounds</Label>
+                <Input id="journal-rounds" className="min-h-11" type="number" min={0} max={500}
+                  value={trainingDetails.sparringRounds ?? ""}
+                  onChange={(event) => {
+                    const sparringRounds = event.target.value === "" ? undefined : event.target.valueAsNumber
+                    setTrainingDetails(current => ({ ...current, sparringRounds }))
+                  }} />
               </div>
-              <FocusAreaTags
-                selectedAreas={focusAreas}
-                onToggleArea={handleToggleFocusArea}
-                onAddCustom={handleAddCustomFocusArea}
-              />
-            </section>
+            </div>
 
-            <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="md:col-span-1 p-6 rounded-3xl bg-card/40 border border-border/50">
-                <div className="space-y-4">
-                  <div>
-                    <p className="mb-2 text-sm font-medium">Journal intensity</p>
-                    <IntensityLevelBar value={intensityLevel} onChange={setIntensityLevel} />
-                  </div>
-                  <div>
-                    <Label htmlFor="journal-rpe" className="mb-2 block">Session RPE <span className="font-normal text-muted-foreground">(optional)</span></Label>
-                    <Input id="journal-rpe" type="number" min={0} max={10} step={1} value={sessionRpe ?? ""} onChange={(event) => {
-                      setSessionRpe(event.target.value === "" ? undefined : event.target.valueAsNumber)
+            <div className="space-y-3">
+              {([
+                ["positionsTrained", "Positions trained", "e.g. Half guard, side control"],
+                ["successfulTechniques", "What worked?", "e.g. Underhook sweep from half guard"],
+                ["techniquesToImprove", "What will you drill next?", "e.g. Recover my frames from bottom side control"],
+              ] as const).map(([key, label, placeholder]) => (
+                <div key={key} className="space-y-1">
+                  <Label htmlFor={`journal-${key}`}>{label}</Label>
+                  <Textarea id={`journal-${key}`} rows={2} maxLength={2000} placeholder={placeholder}
+                    value={trainingDetails[key] ?? ""}
+                    onChange={(event) => {
+                      const value = event.target.value
+                      setTrainingDetails(current => ({ ...current, [key]: value }))
                     }} />
-                    <p className="mt-2 text-xs text-muted-foreground">0 is rest, 10 is maximal effort.</p>
-                  </div>
+                </div>
+              ))}
+            </div>
+
+            <details className="rounded-lg border border-border bg-card">
+              <summary className="min-h-11 cursor-pointer px-3 py-3 text-sm font-medium">More session details</summary>
+              <div className="space-y-4 border-t p-3">
+                <div className="space-y-1">
+                  <Label htmlFor="journal-title">Session title</Label>
+                  <Input id="journal-title" maxLength={200} placeholder="Morning Gi class"
+                    value={title} onChange={(event) => setTitle(event.target.value)} />
+                </div>
+                <FocusAreaTags selectedAreas={focusAreas} onToggleArea={handleToggleFocusArea} onAddCustom={handleAddCustomFocusArea} />
+                <div>
+                  <p className="mb-2 text-sm font-medium">Intensity</p>
+                  <IntensityLevelBar value={intensityLevel ?? 0} onChange={setIntensityLevel} />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="journal-rpe">Session effort (0–10)</Label>
+                  <Input id="journal-rpe" type="number" min={0} max={10} step={1} value={sessionRpe ?? ""} onChange={(event) => {
+                    setSessionRpe(event.target.value === "" ? undefined : event.target.valueAsNumber)
+                  }} />
+                </div>
+                <div data-color-mode={resolvedTheme === "dark" ? "dark" : "light"}>
+                  <Label className="mb-2 block" htmlFor="journal-notes">Session notes</Label>
+                  <MDEditor value={notes} onChange={(value) => setNotes(value || "")} preview="edit" height={220}
+                    textareaProps={{ id: "journal-notes", placeholder: "Any other notes from class?" }} />
                 </div>
               </div>
-              <div className="md:col-span-3 p-6 rounded-3xl bg-card/40 border border-border/50">
-                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 block">
-                  Session Notes (Markdown supported)
-                </Label>
-                <div data-color-mode={resolvedTheme === "dark" ? "dark" : "light"} className="w-full">
-                  <MDEditor
-                    value={notes}
-                    onChange={(val) => setNotes(val || "")}
-                    preview="edit"
-                    height={300}
-                    textareaProps={{
-                      placeholder: "How did it feel? Specific details about your rolls...",
-                    }}
-                    className="bg-card border-border rounded-lg overflow-hidden"
-                  />
-                </div>
-              </div>
-            </section>
+            </details>
 
             {saveError && <p role="alert" className="text-sm font-medium text-destructive">{saveError}</p>}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
